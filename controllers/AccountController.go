@@ -15,7 +15,7 @@ func (this *AccountController) GetLogin() mvc.Result {
 
 func (this *AccountController) GetRegist() mvc.Result {
 	return mvc.View{
-		Name: "account/bind.html",
+		Name: "account/register.html",
 	}
 }
 
@@ -25,8 +25,8 @@ func (this *AccountController) Logout() mvc.Result {
 	}
 }
 
-func (this *AccountController) DoRegist() mvc.Result {
+func (this *AccountController) PostRegist() mvc.Result {
 	return mvc.Response{
-		Content: []byte("doregist"),
+		Content: []byte("postregist"),
 	}
 }

@@ -16,8 +16,8 @@
     <div class="row login">
         <div class="col-xs-12">
                 <div class="login-body">
-                        <form role="form" class="ajax-form" data-url="" action="" method="post">
-                            <h3>{{if true}}用户注册{{else}}完善资料{{end}} <small class="pull-right text-muted">{{.Tips}}</small></h3>
+                        <form role="form" action="/account/regist" method="post">
+                            <h3>用户注册</h3>
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="input-group-addon">&nbsp;用 户 名</div>
@@ -53,12 +53,12 @@
                             <input type="hidden" name="oauth" value="email">
 
                             <div class="form-group mgt-15px">
-                                <button type="submit" class="btn btn-success btn-block" data-has="绑定已有账号" data-not="注册新账号">注册新账号</button>
+                                <button type="submit" class="btn btn-success btn-block">注册新账号</button>
                             </div>
 
                             <div class="help-block">
                                  {{if false}}使用以下方式一键登录{{end}}
-                                 <span class="pull-right"> 已有账号？ <a href="" title="立即登录" class="tooltips text-primary">立即登录</a></span>
+                                 <span class="pull-right"> 已有账号？ <a href="/account/login" title="立即登录" class="tooltips text-primary">立即登录</a></span>
                             </div>
                             <div class="form-group login-by-third">
                                 {{if $.LoginQQ}}
@@ -91,7 +91,8 @@
 <script src="{{$.StaticDomain}}/static/js/toast.script.js" type="text/javascript"></script>
 <script src="/static/js/main.js?version={{$.Version}}" type="text/javascript"></script>
 {{/*js直接写在这里了*/}}
-<script>$(function () {
+<script>
+    $(function () {
     $(".bind-options label").click(function () {
         var options=$(this);
         $.each(options,function () {
