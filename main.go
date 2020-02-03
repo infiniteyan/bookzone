@@ -23,6 +23,9 @@ func newApplication() *iris.Application {
 	application.RegisterView(iris.HTML("./views", ".html"))
 	application.StaticWeb("/static", "./static")
 	application.Logger().SetLevel("debug")
+
+	accountParty := application.Party("/account")
+	mvc.New(accountParty).Handle(new(controllers.AccountController))
 	mvc.New(application).Handle(new(controllers.HomeController))
 
 	return application
