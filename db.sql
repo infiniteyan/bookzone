@@ -57,18 +57,21 @@ CREATE TABLE `md_books` (
 
 DROP TABLE IF EXISTS `md_category`;
 CREATE TABLE `md_category` (
-    id int(11) NOT NULL AUTO_INCREMENT,
-    pid int(11) NOT NULL DEFAULT '0',
-    title varchar(30) NOT NULL DEFAULT '',
-    intro varchar(255) NOT NULL DEFAULT '',
-    icon varchar(255) NOT NULL DEFAULT '',
-    cnt int(11) NOT NULL DEFAULT '0',
-    sort int(11) NOT NULL DEFAULT '0',
-    status tinyint(1) NOT NULL DEFAULT '0',
-    PRIMARY KEY (id),
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `pid` int(11) NOT NULL DEFAULT '0',
+    `title` varchar(30) NOT NULL DEFAULT '',
+    `intro` varchar(255) NOT NULL DEFAULT '',
+    `icon` varchar(255) NOT NULL DEFAULT '',
+    `cnt` int(11) NOT NULL DEFAULT '0',
+    `sort` int(11) NOT NULL DEFAULT '0',
+    `status` tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
     UNIQUE KEY `title` (`title`)
-)ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
+LOCK TABLES `md_category` WRITE;
+INSERT INTO `md_category` VALUES (1,0,'演示','','',1,0,1),(2,0,'后端','','',0,0,1),(3,0,'前端','','',0,0,1),(4,1,'Demo','','',1,0,1),(5,2,'Go','','',0,0,1),(6,2,'JAVA','','',0,0,1),(7,2,'PHP','','',0,0,1),(8,2,'NET','','',0,0,1),(9,2,'Python','','',0,0,1),(10,3,'HTML','','',0,0,1),(11,3,'CSS','','',0,0,1),(12,3,'JavaScript','','',0,0,1),(13,3,'框架','','',0,0,1);
+UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `md_comments`;
 CREATE TABLE `md_comments` (

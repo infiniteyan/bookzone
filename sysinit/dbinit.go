@@ -2,43 +2,36 @@ package sysinit
 
 import (
 	"bookzone/conf"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
 )
 
-var GlobalDB *sql.DB
+var DatabaseEngine *xorm.Engine
 
 func dbinit() {
-	registerDatabase("w")
+	registerDatabase()
 }
 
-func registerDatabase(alias string) {
-	if len(alias) == 0 {
-		return
-	}
-
-	if alias == "w" || alias == "default" {
-		alias = "w"
-	}
-
-	dbNameKey := "db_" + alias + "_database"
-	dbUserKey := "db_" + alias + "_username"
-	dbPwdKey := "db_" + alias + "_password"
-	dbHostKey := "db_" + alias + "_host"
-	dbPortKey := "db_" + alias + "_port"
+func registerDatabase() {
+	var err error
+	dbNameKey := "db_database"
+	dbUserKey := "db_username"
+	dbPwdKey := "db_password"
+	dbHostKey := "db_host"
+	dbPortKey := "db_port"
 
 	dbName := conf.GlobalCfg.Section("mysql").Key(dbNameKey).String()
 	dbUser := conf.GlobalCfg.Section("mysql").Key(dbUserKey).String()
 	dbPwd := conf.GlobalCfg.Section("mysql").Key(dbPwdKey).String()
 	dbHost := conf.GlobalCfg.Section("mysql").Key(dbHostKey).String()
 	dbPort := conf.GlobalCfg.Section("mysql").Key(dbPortKey).String()
+	dataSourceName := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8", dbUser, dbPwd, dbHost, dbPort, dbName)
 
-	fmt.Println(dbName, dbUser)
-
-	GlobalDB, err := sql.Open("mysql", dbUser + ":" + dbPwd + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8")
+	DatabaseEngine, err = xorm.NewEngine("mysql", dataSourceName)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v\n", GlobalDB.Stats())
+	DatabaseEngine = DatabaseEngine
+	fmt.Println("register database success.")
 }

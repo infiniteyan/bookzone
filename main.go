@@ -1,8 +1,9 @@
 package main
 
 import (
-	_ "bookzone/sysinit"
 	"bookzone/controllers"
+	_ "bookzone/models"
+	_ "bookzone/sysinit"
 	"context"
 	"fmt"
 	"github.com/kataras/iris"
