@@ -16,43 +16,50 @@ CREATE TABLE `md_attachment` (
     PRIMARY KEY (attachment_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `md_book_category`;
-CREATE TABLE `md_book_category` (
-    id          int(11) NOT NULL AUTO_INCREMENT,
-    book_id     int(11) NOT NULL DEFAULT '0',
-    category_id int(11) NOT NULL DEFAULT '0',
-    PRIMARY KEY (id),
-    UNIQUE KEY `book_id` (`book_id`, `category_id`)
-)ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `md_books`;
+CREATE TABLE `md_book_category` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `book_id` int(11) NOT NULL DEFAULT '0',
+    `category_id` int(11) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `book_id` (`book_id`,`category_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `md_book_category` WRITE;
+INSERT INTO `md_book_category` VALUES (1,1,1),(2,1,4);
+UNLOCK TABLES;
+
 CREATE TABLE `md_books` (
-    book_id         int(11) NOT NULL AUTO_INCREMENT,
-    book_name       varchar(500) NOT NULL DEFAULT '',
-    identify        varchar(100) NOT NULL DEFAULT '',
-    order_index     int(11) NOT NULL DEFAULT '0',
-    description     varchar(1000) NOT NULL DEFAULT '',
-    cover           varchar(1000) NOT NULL DEFAULT '',
-    editor          varchar(50) NOT NULL DEFAULT '',
-    status          int(11) NOT NULL DEFAULT '0',
-    privately_owned int(11) NOT NULL DEFAULT '0',
-    private_token   varchar(500) DEFAULT NULL,
-    member_id       int(11) NOT NULL DEFAULT '0',
-    create_time     datetime NOT NULL,
-    modify_time     datetime NOT NULL,
-    release_time    datetime NOT NULL,
-    doc_count       int(11) NOT NULL DEFAULT '0',
-    comment_count   int(11) NOT NULL DEFAULT '0',
-    vcnt            int(11) NOT NULL DEFAULT '0',
-    star            int(11) NOT NULL DEFAULT '0',
-    score           int(11) NOT NULL DEFAULT '40',
-    cnt_score       int(11) NOT NULL DEFAULT '0',
-    cnt_comment     int(11) NOT NULL DEFAULT '0',
-    author          varchar(50) NOT NULL DEFAULT '',
-    author_url      varchar(1000) NOT NULL DEFAULT '',
-    PRIMARY KEY (book_id),
+    `book_id` int(11) NOT NULL AUTO_INCREMENT,
+    `book_name` varchar(500) NOT NULL DEFAULT '',
+    `identify` varchar(100) NOT NULL DEFAULT '',
+    `order_index` int(11) NOT NULL DEFAULT '0',
+    `description` varchar(1000) NOT NULL DEFAULT '',
+    `cover` varchar(1000) NOT NULL DEFAULT '',
+    `editor` varchar(50) NOT NULL DEFAULT '',
+    `status` int(11) NOT NULL DEFAULT '0',
+    `privately_owned` int(11) NOT NULL DEFAULT '0',
+    `private_token` varchar(500) DEFAULT NULL,
+    `member_id` int(11) NOT NULL DEFAULT '0',
+    `create_time` datetime NOT NULL,
+    `modify_time` datetime NOT NULL,
+    `release_time` datetime NOT NULL,
+    `doc_count` int(11) NOT NULL DEFAULT '0',
+    `comment_count` int(11) NOT NULL DEFAULT '0',
+    `vcnt` int(11) NOT NULL DEFAULT '0',
+    `star` int(11) NOT NULL DEFAULT '0',
+    `score` int(11) NOT NULL DEFAULT '40',
+    `cnt_score` int(11) NOT NULL DEFAULT '0',
+    `cnt_comment` int(11) NOT NULL DEFAULT '0',
+    `author` varchar(50) NOT NULL DEFAULT '',
+    `author_url` varchar(1000) NOT NULL DEFAULT '',
+    PRIMARY KEY (`book_id`),
     UNIQUE KEY `identify` (`identify`)
-)ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `md_books` WRITE;
+INSERT INTO `md_books` VALUES (1,'演示','demo',0,'用于演示的书籍','/static/images/book.png','markdown',0,0,'',1,'2019-12-16 06:16:03','2019-12-16 06:16:03','2019-12-16 06:16:03',1,0,0,0,50,1,0,'','');
+UNLOCK TABLES;
 
 
 DROP TABLE IF EXISTS `md_category`;
