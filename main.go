@@ -25,12 +25,11 @@ func newApplication() *iris.Application {
 	application.StaticWeb("/static", "./static")
 	application.Logger().SetLevel("debug")
 
-	accountParty := application.Party("/account")
-	exploreParty := application.Party("/explore")
-	mvc.New(exploreParty).Handle(new(controllers.ExploreController))
-	mvc.New(accountParty).Handle(new(controllers.AccountController))
+	mvc.New(application.Party("/explore")).Handle(new(controllers.ExploreController))
+	mvc.New(application.Party("/account")).Handle(new(controllers.AccountController))
+	mvc.New(application.Party("/books")).Handle(new(controllers.DocumentController))
+	mvc.New(application.Party("/read")).Handle(new(controllers.DocumentController))
 	mvc.New(application).Handle(new(controllers.HomeController))
-
 	return application
 }
 

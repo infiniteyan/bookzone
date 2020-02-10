@@ -6,7 +6,7 @@ import (
 	"html/template"
 )
 
-func NewPaginations(rollPage, totalRows, listRows, currentPage int, urlPrefix string, urlSuffix string, urlParams ...interface{}) html1.HTML {
+func NewPaginations(rollPage, totalRows, listRows, currentPage int, urlPrefix string, urlSuffix string, urlParams ...interface{}) template.HTML {
 	var (
 		htmlPage, path string
 		pages          []int
@@ -108,4 +108,8 @@ func NewPaginations(rollPage, totalRows, listRows, currentPage int, urlPrefix st
 	}
 
 	return template.HTML(`<ul class="pagination">` + htmlPage + `</ul>`)
+}
+
+func ScoreFloat(score int) string {
+	return fmt.Sprintf("%1.1f", float32(score)/10.0)
 }

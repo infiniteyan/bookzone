@@ -14,9 +14,10 @@ type ExploreController struct {
 	Ctx iris.Context
 }
 
-func (this *ExploreController) GetBy(id int) mvc.Result {
+func (this *ExploreController) Get() mvc.Result {
 	urlPrefix := "/explore"
 	dataMap := make(map[string]interface{})
+	id, _ := strconv.Atoi(this.Ctx.URLParam("cid"))
 	log.Printf("get items by cid:%d\n", id)
 	category, _ := new(models.Category).Find(id)
 	dataMap["Cid"] = id
@@ -34,8 +35,6 @@ func (this *ExploreController) GetBy(id int) mvc.Result {
 			},
 		}
 	}
-	books = books
-	totalCount = totalCount
 
 	if totalCount > 0 {
 		urlSuffix := ""

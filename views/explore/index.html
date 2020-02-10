@@ -31,29 +31,20 @@
                 <div class="col-xs-6 col-sm-3 col-md-2">
                     <dl class="manual-item-standard">
                         <dt>
-                            <a class="clearfix tooltips {{if gt $item.OrderIndex 0}}recommend-book{{end}}" href="" title="{{$item.BookName}}" target="_blank" >
+                            <a class="clearfix tooltips {{if gt $item.OrderIndex 0}}recommend-book{{end}}" href="" title="{{$item.BookName}}" >
                                 <img class="img-responsive border-cover-img" onerror="this.src='/static/images/book.png'" src="" class="cover" alt="{{$item.BookName}}">
                             </a>
                         </dt>
                         <dd>
-                            <a href="" class="name tooltips" title="{{$item.BookName}}" target="_blank">{{$item.BookName}}</a>
+                            <a href="/books/{{$item.Identify}}" class="name tooltips" title="{{$item.BookName}}" target="_blank">{{$item.BookName}}</a>
                         </dd>
-                        {{/*<dd>*/}}
-                            {{/*<span class="author">*/}}
-                                {{/*<b class="text">作者</b>*/}}
-                                {{/*<b class="text">-</b>*/}}
-                                {{/*<b class="text">{{$item.CreateName}}</b>*/}}
-                            {{/*</span>*/}}
-                        {{/*</dd>*/}}
                     </dl>
                 </div>
                 {{end}}
                 <div class="clearfix"></div>
             </div>
             <nav class="pagination-container">
-                {{if gt .TotalPages 1}}
                 {{.PageHtml}}
-                {{end}}
                 <div class="clearfix"></div>
             </nav>
         </div>
