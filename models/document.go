@@ -2,10 +2,10 @@ package models
 
 import (
 	"bookzone/sysinit"
-	"encoding/json"
+	"bookzone/util"
 	"errors"
 	"fmt"
-	"log"
+	"bookzone/util/log"
 	"strings"
 	"time"
 )
@@ -97,8 +97,8 @@ func (this *Document) GetMenuTop(bookId int) ([]*Document, error) {
 	cols := []string{"document_id", "document_name", "member_id", "parent_id", "book_id", "identify"}
 	sql := "select %v from md_documents where book_id = ? and parent_id = 0 order by order_sort, document_id limit 5000"
 	sql = fmt.Sprintf(sql, strings.Join(cols, ","))
-	log.Printf("execute sql:%s\n", sql)
-	retSlice, err := sysinit.DatabaseEngine.Query(sql, bookId)
+	log.Infof("execute sql:%s", sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql, bookId)
 	if err != nil {
 		return nil ,err
 	}
@@ -106,14 +106,7 @@ func (this *Document) GetMenuTop(bookId int) ([]*Document, error) {
 	var docs []*Document
 	for _, data := range retSlice {
 		var doc Document
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &doc)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &doc)
 		docs = append(docs, &doc)
 	}
 

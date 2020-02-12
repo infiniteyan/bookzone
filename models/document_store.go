@@ -2,7 +2,7 @@ package models
 
 import (
 	"bookzone/sysinit"
-	"log"
+	"bookzone/util/log"
 )
 
 type DocumentStore struct {
@@ -31,7 +31,7 @@ func (this *DocumentStore) InsertOrUpdate(fields ...string) error {
 	has, err := sysinit.DatabaseEngine.Get(docStore)
 
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 		return err
 	}
 	if has {

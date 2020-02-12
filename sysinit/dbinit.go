@@ -2,6 +2,7 @@ package sysinit
 
 import (
 	"bookzone/conf"
+	"bookzone/util/log"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
@@ -33,5 +34,5 @@ func registerDatabase() {
 		panic(err)
 	}
 	DatabaseEngine = DatabaseEngine
-	fmt.Println("register database success.")
+	log.Infof("register database success.")
 }

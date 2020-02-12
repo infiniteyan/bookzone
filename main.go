@@ -4,8 +4,8 @@ import (
 	"bookzone/controllers"
 	_ "bookzone/models"
 	_ "bookzone/sysinit"
+	"bookzone/util/log"
 	"context"
-	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/mvc"
 	"os"
@@ -34,6 +34,7 @@ func newApplication() *iris.Application {
 }
 
 func main() {
+	log.SetLogLevel(log.DebugLevel)
 	app := newApplication()
 
 	go func() {
@@ -46,7 +47,7 @@ func main() {
 			)
 		select {
 		case <- ch:
-			fmt.Println("shutdown...")
+			log.Infof("shutdown...")
 			timeout := 5 * time.Second
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
 			defer cancel()

@@ -2,7 +2,7 @@ package models
 
 import (
 	"bookzone/sysinit"
-	"encoding/json"
+	"bookzone/util"
 	"errors"
 	"fmt"
 	"strconv"
@@ -31,7 +31,7 @@ func (this *Comments) AddComments(uid, bookId int, content string) error {
 	var err error
 	second := 10
 	sql := "select id from " + fmt.Sprintf("md_comments_%04d", bookId % 2) + "where uid = ? and time_create > ? order by id desc"
-	ret, err := sysinit.DatabaseEngine.Query(sql, uid, time.Now().Add(-time.Duration(second) * time.Second))
+	ret, err := sysinit.DatabaseEngine.QueryString(sql, uid, time.Now().Add(-time.Duration(second) * time.Second))
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (this *Comments) AddComments(uid, bookId int, content string) error {
 func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResult, error) {
 	sql := "select book_id, uid, content, time_create from " + fmt.Sprintf("md_comments_%04d", bookId % 2) + " where book_id = ? limit %v offset %v"
 	sql = fmt.Sprintf(sql, size, (page - 1) * size)
-	retSlice, err := sysinit.DatabaseEngine.Query(sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 
 	if err != nil {
 		return nil, err
@@ -65,14 +65,7 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 	var comments []*BookCommentsResult
 	for _, data := range retSlice {
 		var cmtRet BookCommentsResult
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &cmtRet)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &cmtRet)
 		comments = append(comments, &cmtRet)
 	}
 
@@ -83,7 +76,7 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 	uidstr := strings.Join(uids, ",")
 	sql = "select member_id, avatar, nickname from md_members where member_id in(" + uidstr + ")"
 
-	retSlice, err = sysinit.DatabaseEngine.Query(sql)
+	retSlice, err = sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -91,14 +84,7 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 	var members []*Member
 	for _, data := range retSlice {
 		var cmtRet Member
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &cmtRet)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &cmtRet)
 		members = append(members, &cmtRet)
 	}
 
@@ -113,20 +99,13 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 
 	sql = "select uid, score from md_score where book_id = ? and uid in(" + uidstr + ")"
 	scores := []*Score{}
-	retSlice, err = sysinit.DatabaseEngine.Query(sql)
+	retSlice, err = sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, err
 	}
 	for _, data := range retSlice {
 		var score Score
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &score)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &score)
 		scores = append(scores, &score)
 	}
 	scoreMap := make(map[int]*Score)
@@ -163,7 +142,7 @@ func (this *Score) BookScores(p, listRows, bookId int) ([]*BookScoreResult, erro
 	sql := "select s.score,s.time_create,m.avatar,m.nickname from md_score s left join md_members m on m.member_id=s.uid where s.book_id=? order by s.id desc limit %v offset %v"
 	sql = fmt.Sprintf(sql, listRows, (p - 1) * listRows)
 
-	retSlice, err := sysinit.DatabaseEngine.Query(sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -171,14 +150,7 @@ func (this *Score) BookScores(p, listRows, bookId int) ([]*BookScoreResult, erro
 	var scoreRets []*BookScoreResult
 	for _, data := range retSlice {
 		var scoreResult BookScoreResult
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &scoreResult)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &scoreResult)
 		scoreRets = append(scoreRets, &scoreResult)
 	}
 

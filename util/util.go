@@ -1,9 +1,13 @@
 package util
 
 import (
+	"bookzone/sysinit"
 	"fmt"
-	"strings"
 	"html/template"
+	"reflect"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func NewPaginations(rollPage, totalRows, listRows, currentPage int, urlPrefix string, urlSuffix string, urlParams ...interface{}) template.HTML {
@@ -112,4 +116,86 @@ func NewPaginations(rollPage, totalRows, listRows, currentPage int, urlPrefix st
 
 func ScoreFloat(score int) string {
 	return fmt.Sprintf("%1.1f", float32(score)/10.0)
+}
+
+func InMap(maps map[int]bool, key int) (ret bool) {
+	if _, ok := maps[key]; ok {
+		return true
+	}
+	return
+}
+
+func IncOrDec(table string, field string, condition string, incre bool, step ...int) error {
+	mark := "-"
+	if incre {
+		mark = "+"
+	}
+
+	s := 1
+	if len(step) > 0 {
+		s = step[0]
+	}
+
+	sql := fmt.Sprintf("update %v set %v = %v %v %v where %v", table, field, field, mark, s, condition)
+	_, err := sysinit.DatabaseEngine.Exec(sql)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Map2struct(m map[string]string, model interface{}) {
+	modelType := reflect.TypeOf(model).Elem()
+	modelValue := reflect.ValueOf(model).Elem()
+	for i := 0; i < modelType.NumField(); i++ {
+		jsonTag, ok := modelType.Field(i).Tag.Lookup("json")
+
+		if !ok || jsonTag == "" {
+			continue
+		}
+
+		if v, ok := m[jsonTag]; ok {
+			kind := modelType.Field(i).Type.Kind()
+			switch kind {
+			case reflect.String:
+				modelValue.Field(i).Set(reflect.ValueOf(v))
+			case reflect.Int:
+				intVal, err :=strconv.Atoi(v)
+				if err == nil {
+					modelValue.Field(i).Set(reflect.ValueOf(intVal))
+				}
+			case reflect.Int32:
+				intVal, err :=strconv.Atoi(v)
+				if err == nil {
+					modelValue.Field(i).Set(reflect.ValueOf(intVal))
+				}
+			case reflect.Float32:
+				floatVal, err := strconv.ParseFloat(v, 32)
+				if err == nil {
+					modelValue.Field(i).Set(reflect.ValueOf(floatVal))
+				}
+			case reflect.Float64:
+				floatVal, err := strconv.ParseFloat(v, 64)
+				if err == nil {
+					modelValue.Field(i).Set(reflect.ValueOf(floatVal))
+				}
+			case reflect.Bool:
+				boolVal, err := strconv.ParseBool(v)
+				if err == nil {
+					modelValue.Field(i).Set(reflect.ValueOf(boolVal))
+				}
+			case reflect.Struct:
+				name := modelType.Field(i).Type.Name()
+				if name == "Time" {
+					timeVal, err := time.ParseInLocation("20060102 15:04:05", v, time.Local)
+					if err != nil {
+						continue
+					}
+					modelValue.Field(i).Set(reflect.ValueOf(timeVal))
+				}
+
+			default:
+			}
+		}
+	}
 }

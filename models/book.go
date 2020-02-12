@@ -3,9 +3,9 @@ package models
 import (
 	"bookzone/sysinit"
 	"bookzone/util"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"bookzone/util/log"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +23,7 @@ type Book struct {
 	PrivatelyOwned 	int       			`json:"privately_owned"`
 	PrivateToken   	string    			`json:"private_token"`
 	MemberId       	int      			`json:"member_id"`
-	CreateTime     	time.Time 			`son:"create_time"`
+	CreateTime     	time.Time 			`json:"create_time"`
 	ModifyTime     	time.Time 			`json:"modify_time"`
 	ReleaseTime    	time.Time 			`json:"release_time"`
 	DocCount       	int       			`json:"doc_count"`
@@ -53,29 +53,16 @@ func (this *Book) HomeData(pageIndex, pageSize int, cid int, fields ...string) (
 	fieldStr := "b." + strings.Join(fields, ",b.")
 	sqlFmt := "select %s from md_books b left join md_book_category c on b.book_id = c.book_id where c.category_id = " + strconv.Itoa(cid)
 	sql := fmt.Sprintf(sqlFmt, fieldStr)
-	fmt.Println(sql)
+	log.Infof("execute sql:", sql)
 
-	resultSlice, err := sysinit.DatabaseEngine.Query(sql)
+	resultSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, 0, err
 	}
 	var books []Book
 	for _, data := range resultSlice {
 		var book Book
-		id , err := strconv.Atoi(string(data["book_id"]))
-		if err != nil {
-			continue
-		}
-		index, err := strconv.Atoi(string(data["order_index"]))
-		if err != nil {
-			continue
-		}
-		book.BookId = id
-		book.OrderIndex = index
-		book.BookName = string(data["book_name"])
-		book.Identify = string(data["identify"])
-		book.Cover = string(data["cover"])
-
+		util.Map2struct(data, &book)
 		books = append(books, book)
 	}
 
@@ -110,7 +97,7 @@ func (this *Book) Update(cols ...string) error {
 		return err
 	}
 	if !has {
-		log.Println("please insert first")
+		log.Infof("please insert first")
 		return err
 	}
 
@@ -118,15 +105,21 @@ func (this *Book) Update(cols ...string) error {
 	return err
 }
 
-func (this *Book) SelectByIdentify(value string) (*Book, error) {
-	tmp := &Book{}
-	tmp.Identify = value
-	_, err := sysinit.DatabaseEngine.Get(tmp)
+func (this *Book) Select(field string, value interface{}) (*Book, error)  {
+	var book Book
+	var err error
+	sql := fmt.Sprintf("select * from md_books where %v = \"%v\"", field, value)
+	log.Infof("execute sql:%s", sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(retSlice) > 0 {
+		util.Map2struct(retSlice[0], &book)
+		return &book, nil
 	} else {
-		this = tmp
-		return this, nil
+		return nil, errors.New("fail to get book")
 	}
 }
 
@@ -168,7 +161,7 @@ func (this *Book) SelectPage(pageIndex, pageSize, memberId int, PrivatelyOwned i
 	sql1 := "select count(b.book_id) as total_count from md_books as b left join " +
 		"md_relationship as r on b.book_id=r.book_id and r.member_id = ? where r.relationship_id > 0  and b.privately_owned = " + strconv.Itoa(PrivatelyOwned)
 
-	retSlice, err := sysinit.DatabaseEngine.Query(sql1, memberId)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql1, memberId)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -182,21 +175,14 @@ func (this *Book) SelectPage(pageIndex, pageSize, memberId int, PrivatelyOwned i
 		" where rel.relationship_id > 0 %v order by book.book_id desc limit " + fmt.Sprintf("%d,%d", offset, pageSize)
 	sql2 = fmt.Sprintf(sql2, " and book.privately_owned="+strconv.Itoa(PrivatelyOwned))
 
-	retSlice, err = sysinit.DatabaseEngine.Query(sql2, memberId)
+	retSlice, err = sysinit.DatabaseEngine.QueryString(sql2, memberId)
 	if err != nil {
 		return nil, totalCount, err
 	}
 
 	for _, data := range retSlice {
 		var book Book
-		byteContent, err := json.Marshal(data)
-		if err != nil {
-			continue
-		}
-		err = json.Unmarshal(byteContent, &book)
-		if err != nil {
-			continue
-		}
+		util.Map2struct(data, &book)
 		books = append(books, book.ToBookData())
 	}
 
@@ -207,7 +193,7 @@ func (this *Book) RefreshDocumentCount(bookId int) {
 	doc := &Document{BookId: bookId}
 	count, err := sysinit.DatabaseEngine.Count(doc)
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 	} else {
 		bean := NewBook()
 		bean.DocCount = int(count)

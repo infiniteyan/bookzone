@@ -4,7 +4,7 @@ import (
 	"bookzone/common"
 	"bookzone/sysinit"
 	"bookzone/util"
-	"log"
+	"bookzone/util/log"
 	"regexp"
 	"time"
 	"errors"
@@ -129,7 +129,7 @@ func (this *Member) GetUsernameByUid(id int) string {
 	member := &Member{MemberId: id}
 	_, err := sysinit.DatabaseEngine.Get(member)
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 		return ""
 	}
 	return member.Account
@@ -139,7 +139,7 @@ func (this *Member) GetNicknameByUid(id int) string {
 	member := &Member{MemberId: id}
 	_, err := sysinit.DatabaseEngine.Get(member)
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 		return ""
 	}
 	return member.Nickname
@@ -149,7 +149,7 @@ func (this *Member) GetByUsername(name string) (*Member, error) {
 	member := &Member{Account: name}
 	_, err := sysinit.DatabaseEngine.Get(member)
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 		return nil, err
 	}
 	return member, nil

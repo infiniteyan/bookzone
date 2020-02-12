@@ -2,13 +2,13 @@ package models
 
 import (
 	"bookzone/sysinit"
-	"encoding/json"
+	"bookzone/util"
+	"bookzone/util/html2text"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
-	"bookzone/util/html2text"
 )
 
 type DocumentData struct {
@@ -59,7 +59,7 @@ func (m *DocumentSearch) SearchDocument(keyword string, bookId int, page, size i
 
 	var err error
 	var docs []*DocumentSearch
-	retSlice, err := sysinit.DatabaseEngine.Query(sqlCount, like, like)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sqlCount, like, like)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -67,21 +67,14 @@ func (m *DocumentSearch) SearchDocument(keyword string, bookId int, page, size i
 	count = len(retSlice)
 	limit := fmt.Sprintf(" limit %v offset %v", size, (page - 1) * size)
 	if count > 0 {
-		retSlice, err = sysinit.DatabaseEngine.Query(sql + limit, like, like)
+		retSlice, err = sysinit.DatabaseEngine.QueryString(sql + limit, like, like)
 		if err != nil {
 			return nil, 0, err
 		}
 
 		for _, data := range retSlice {
 			var doc DocumentSearch
-			byteContent, err := json.Marshal(data)
-			if err != nil {
-				continue
-			}
-			err = json.Unmarshal(byteContent, &doc)
-			if err != nil {
-				continue
-			}
+			util.Map2struct(data, &doc)
 			docs = append(docs, &doc)
 		}
 	}
@@ -112,7 +105,7 @@ func (m *DocumentSearch) GetDocsById(id []int, withoutCont ...bool) ([]*Document
 	var docs []*DocumentData
 	var err error
 
-	retSlice, err := sysinit.DatabaseEngine.Query(sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -121,14 +114,7 @@ func (m *DocumentSearch) GetDocsById(id []int, withoutCont ...bool) ([]*Document
 		docMap := make(map[int]*DocumentData)
 		for _, data := range retSlice {
 			var docData DocumentData
-			byteContent, err := json.Marshal(data)
-			if err != nil {
-				continue
-			}
-			err = json.Unmarshal(byteContent, &docData)
-			if err != nil {
-				continue
-			}
+			util.Map2struct(data, &docData)
 			docMap[docData.DocumentId] = &docData
 		}
 

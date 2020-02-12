@@ -4,7 +4,7 @@ import (
 	"bookzone/models"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/mvc"
-	"log"
+	"bookzone/util/log"
 	"math"
 	"strconv"
 	"ziyoubiancheng/mbook/utils"
@@ -18,7 +18,7 @@ func (this *ExploreController) Get() mvc.Result {
 	urlPrefix := "/explore"
 	dataMap := make(map[string]interface{})
 	id, _ := strconv.Atoi(this.Ctx.URLParam("cid"))
-	log.Printf("get items by cid:%d\n", id)
+	log.Infof("get items by cid:%d", id)
 	category, _ := new(models.Category).Find(id)
 	dataMap["Cid"] = id
 	dataMap["Cate"] = category

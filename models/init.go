@@ -2,10 +2,10 @@ package models
 
 import (
 	"bookzone/sysinit"
-	"log"
+	"bookzone/util/log"
 )
 
 func init() {
 	sysinit.DatabaseEngine.Sync2(new(Category))
-	log.Println("register Category...")
+	log.Infof("register Category...")
 }

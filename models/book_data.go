@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"bookzone/sysinit"
+	"bookzone/common"
+	"time"
+	"errors"
+)
 
 type BookData struct {
 	BookId         int       `json:"book_id"`
@@ -36,4 +41,47 @@ type BookData struct {
 
 func NewBookData() *BookData {
 	return &BookData{}
+}
+
+func (m *BookData) SelectByIdentify(identify string, memberId int) (*BookData, error) {
+	var bookData *BookData
+	var err error
+	if identify == "" || memberId <= 0 {
+		return nil, errors.New("invalid parameter")
+	}
+
+	book := &Book{Identify: identify}
+	_, err = sysinit.DatabaseEngine.Get(book)
+	if err != nil {
+		return nil, err
+	}
+
+	relationship := NewRelationship()
+	relationship.BookId = book.BookId
+	relationship.RoleId = 0
+	_, err = sysinit.DatabaseEngine.Get(relationship)
+	if err != nil {
+		return nil, errors.New("permission denied")
+	}
+
+	member, err := NewMember().Find(relationship.MemberId)
+	if err != nil {
+		return nil, err
+	}
+
+	relationship = NewRelationship()
+	relationship.BookId = book.BookId
+	relationship.MemberId = memberId
+	_, err = sysinit.DatabaseEngine.Get(relationship)
+	if err != nil {
+		return nil, err
+	}
+
+	bookData = book.ToBookData()
+	bookData.CreateName = member.Account
+	bookData.MemberId = relationship.MemberId
+	bookData.RoleId = relationship.RoleId
+	bookData.RoleName = common.BookRole(bookData.RoleId)
+	bookData.RelationshipId = relationship.RelationshipId
+	return bookData, nil
 }

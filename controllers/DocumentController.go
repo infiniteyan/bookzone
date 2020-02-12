@@ -4,7 +4,7 @@ import (
 	"bookzone/models"
 	"errors"
 	"github.com/kataras/iris/mvc"
-	"log"
+	"bookzone/util/log"
 	"strings"
 )
 
@@ -19,9 +19,9 @@ func (this *DocumentController) BeforeActivation(a mvc.BeforeActivation) {
 }
 
 func (this *DocumentController) getBookData(identify, token string) (*models.BookData, error) {
-	book, err := models.NewBook().SelectByIdentify(identify)
+	book, err := models.NewBook().Select("identify", identify)
 	if err != nil {
-		log.Println(err)
+		log.Errorf(err.Error())
 		return nil, err
 	}
 
