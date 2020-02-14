@@ -53,7 +53,7 @@ func (this *Book) HomeData(pageIndex, pageSize int, cid int, fields ...string) (
 	fieldStr := "b." + strings.Join(fields, ",b.")
 	sqlFmt := "select %s from md_books b left join md_book_category c on b.book_id = c.book_id where c.category_id = " + strconv.Itoa(cid)
 	sql := fmt.Sprintf(sqlFmt, fieldStr)
-	log.Infof("execute sql:", sql)
+	log.Infof("execute sql:%s", sql)
 
 	resultSlice, err := sysinit.DatabaseEngine.QueryString(sql)
 	if err != nil {

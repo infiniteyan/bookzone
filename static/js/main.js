@@ -83,8 +83,6 @@ function alertTips(cls,msg,timeout,url) {
 }
 
 $(function () {
-
-
     //文档图书评分
     if($("body").attr("id")=="mbook-intro"){
         var stars=$(".cursor-pointer .fa")
@@ -154,6 +152,7 @@ $(function () {
         e.preventDefault()
         var _url=$(this).attr("href"),_this=$(this);
         $.get(_url,function (ret) {
+            alert("=============2")
             ret=parseJson(ret);
             if(ret.errcode==0){//操作成功
                 alertTips("success",ret.message,3000,"");
@@ -178,6 +177,7 @@ $(function () {
         }
         var _url=$(this).attr("href"),_this=$(this);
         $.get(_url,function (ret) {
+            alert("=============3")
             ret=parseJson(ret);
             if(ret.errcode==0){//操作成功
                 alertTips("success",ret.message,3000,location.href);
@@ -222,6 +222,7 @@ $(function () {
 
         } else{
             $.get(action,data,function(ret){
+                alert("=============5")
                 ret=parseJson(ret);
                 if (ret.errcode==0) {
                     alertTips("success",ret.message,2000,_url);
@@ -249,6 +250,7 @@ $(function () {
     $(".btn-filedown").click(function (e) {
         e.preventDefault();
         $.get($(this).attr("href"),function (res) {
+            alert("=============6")
            var obj=parseJson(res);
            if (obj.errcode==0){
                location.href=obj.data.url;
@@ -304,6 +306,7 @@ $(function () {
         e.preventDefault();
         var _this=$(this),href=_this.attr("href");
         $.get(href,function (ret) {
+            alert("=============7")
             var obj=parseJson(ret);
            if(obj.errcode==0){
                var html='<a href="'+href+'" class="btn btn-default btn-sm btn-cancel"><i class="fa fa-heart text-danger"></i> 取消关注</a>';
@@ -319,6 +322,7 @@ $(function () {
         e.preventDefault();
         var _this=$(this),href=_this.attr("href");
         $.get(href,function (ret) {
+            alert("=============8")
             var obj=parseJson(ret);
             if(obj.errcode==0){
                 var html='<a href="'+href+'" class="btn btn-success btn-sm btn-follow"><i class="fa fa-heart-o"></i> 关注Ta</a>';

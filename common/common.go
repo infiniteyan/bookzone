@@ -1,5 +1,7 @@
 package common
 
+import "bookzone/conf"
+
 const SessionName = "__bookzone_session__"
 
 const RegexpEmail = `^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$`
@@ -48,4 +50,9 @@ func BookRole(role int) string {
 	default:
 		return ""
 	}
+}
+
+func DefaultAvatar() string {
+	avatar := conf.GlobalCfg.Section("other").Key("avatar").String()
+	return avatar
 }

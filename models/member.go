@@ -12,20 +12,20 @@ import (
 )
 
 type Member struct {
-	MemberId      int       `orm:"pk;auto" json:"member_id"`
-	Account       string    `orm:"size(30);unique" json:"account"`
-	Nickname      string    `orm:"size(30);unique" json:"nickname"`
-	Password      string    ` json:"-"`
-	Description   string    `orm:"size(640)" json:"description"`
-	Email         string    `orm:"size(100);unique" json:"email"`
-	Phone         string    `orm:"size(20);null;default(null)" json:"phone"`
+	MemberId      int       `xorm:"pk autoincr" json:"member_id"`
+	Account       string    `json:"account"`
+	Nickname      string    `json:"nickname"`
+	Password      string    `json:"-"`
+	Description   string    `json:"description"`
+	Email         string    `json:"email"`
+	Phone         string    `json:"phone"`
 	Avatar        string    `json:"avatar"`
-	Role          int       `orm:"default(1)" json:"role"`
-	RoleName      string    `orm:"-" json:"role_name"`
-	Status        int       `orm:"default(0)" json:"status"`
-	CreateTime    time.Time `orm:"type(datetime);auto_now_add" json:"create_time"`
+	Role          int       `json:"role"`
+	RoleName      string    `xorm:"-" json:"role_name"`
+	Status        int       `json:"status"`
+	CreateTime    time.Time `json:"create_time"`
 	CreateAt      int       `json:"create_at"`
-	LastLoginTime time.Time `orm:"type(datetime);null" json:"last_login_time"`
+	LastLoginTime time.Time `json:"last_login_time"`
 }
 
 func (this *Member) TableName() string {

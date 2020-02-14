@@ -43,7 +43,7 @@ func (this *DocumentController) getBookData(identify, token string) (*models.Boo
 	}
 
 	bookResult := book.ToBookData()
-	if this.Member != nil {
+	if this.Member.MemberId > 0 {
 		rsh, err := models.NewRelationship().Select(bookResult.BookId, this.Member.MemberId)
 		if err == nil {
 			bookResult.MemberId = rsh.MemberId
@@ -86,7 +86,7 @@ func (this *DocumentController) Index() mvc.Result {
 	tab := strings.ToLower(this.Ctx.URLParam("tab"))
 	dataMap["Tab"] = tab
 	dataMap["Book"] = bookResult
-	if this.Member != nil {
+	if this.Member.MemberId > 0 {
 		dataMap["MyScore"] = new(models.Score).BookScoreByUid(this.Member.MemberId, bookResult.BookId)
 	}
 

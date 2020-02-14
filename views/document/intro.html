@@ -21,11 +21,7 @@
         </div>
         <div class="col-sm-9 col-xs-6">
             <ul class="none-listyle">
-                <!--<li class="mbook-score"><span>文档评分：</span>
-                    <i class="mbook-star star-{{.Book.Score}}"></i>
-                    {{.Book.ScoreFloat}}
-                    （<span class="text-muted">{{.Book.CntScore}} 个有效评分</span>）
-                </li>-->
+                <li><span>文档评分：</span>{{.Book.Score}}</li>
                 <li><span>章节数量：</span>{{.Book.DocCount}}</li>
                 <li><span>阅读人次：</span>{{.Book.Vcnt}}</li>
 				<li><span>图书作者：</span><a target="_blank" class="text-primary" href="">{{.Book.Author}}</a></li>
@@ -80,7 +76,7 @@
                             {{/*评论*/}}
                             <li class="comments-form clearfix">
                                 <div class="score">
-                                    <span title="点击即可给当前文档打分" class="cursor-pointer" data-url="" data-toggle="tooltip">
+                                    <span title="点击即可给当前文档打分" class="cursor-pointer" data-url="/book/{{$.Book.BookId}}" data-toggle="tooltip">
                                         <i class="fa fa-star-o" data-score="1" data-tips="很差"></i>
                                         <i class="fa fa-star-o" data-score="2" data-tips="较差"></i>
                                         <i class="fa fa-star-o" data-score="3" data-tips="还行"></i>
@@ -90,7 +86,7 @@
                                     <span class="text-muted"></span>
 
                                 </div>
-                                <form action="" method="post" class="ajax-form">
+                                <form action="/book" method="post" class="ajax-form">
                                     <div class="form-group">
                                         <textarea class="form-control" name="content" rows="3" placeholder="在这里，您可以给当前小编提意见和建议，以及对文档内容进行纠偏纠错提醒。"></textarea>
                                     </div>
@@ -152,7 +148,7 @@
 </div>
 {{template "widgets/footer.html" .}}
 <script type="text/javascript" src="{{$.StaticDomain}}/static/js/toast.script.js"></script>
-<script type="text/javascript" src="/static/js/main.js?version={{$.Version}}"></script>
+<script type="text/javascript" src="/static/js/main.js"></script>
 <script>
 $(function(){
     $("#mbook-intro .mbook-info img").click(function(){
@@ -160,4 +156,5 @@ $(function(){
     })
 })
 </script>
+</body>
 </html>
