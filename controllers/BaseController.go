@@ -20,7 +20,6 @@ type BaseController struct {
 	Member 				models.Member
 	Option 				map[string]string
 	EnableAnonymous		bool
-	baseSession 		*sessions.Session
 }
 
 func (this *BaseController) JsonResult(errCode common.HttpCode, errMsg string, data ...interface{}) {
@@ -36,8 +35,7 @@ func (this *BaseController) JsonResult(errCode common.HttpCode, errMsg string, d
 }
 
 func (this *BaseController) getSession() *sessions.Session {
-	this.baseSession = GlobalSessions.Start(this.Ctx)
-	return this.baseSession
+	return GlobalSessions.Start(this.Ctx)
 }
 
 func (this *BaseController) SetSession(key string, value interface{}) {

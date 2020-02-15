@@ -1,17 +1,17 @@
 package controllers
 
 import (
+	"bookzone/common"
 	"bookzone/models"
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/mvc"
 	"bookzone/util/log"
+	"github.com/kataras/iris/mvc"
 	"math"
 	"strconv"
 	"ziyoubiancheng/mbook/utils"
 )
 
 type ExploreController struct {
-	Ctx iris.Context
+	BaseController
 }
 
 func (this *ExploreController) Get() mvc.Result {
@@ -22,6 +22,13 @@ func (this *ExploreController) Get() mvc.Result {
 	category, _ := new(models.Category).Find(id)
 	dataMap["Cid"] = id
 	dataMap["Cate"] = category
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if ok {
+		dataMap["Member"] = member
+	} else {
+		dataMap["Member"] = models.Member{}
+	}
 
 	//pageStr := this.Ctx.Params().Get("page")
 	pageIndex := 1

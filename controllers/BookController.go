@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"bookzone/common"
+	"bookzone/models"
 	"bookzone/util/log"
 	"github.com/kataras/iris/mvc"
+	"strconv"
 )
 
 type BookController struct {
@@ -12,17 +14,39 @@ type BookController struct {
 
 func (this *BookController) BeforeActivation(a mvc.BeforeActivation) {
 	log.Infof("BookController BeforeActivation")
-	a.Handle("POST", "/", "Comment")
+	a.Handle("POST", "/comment/{id:int}", "Comment")
 	a.Handle("GET", "/{id:int}", "Score")
 }
 
 func (this *BookController) Comment() {
 	log.Infof("BookController Post")
-	content := this.Ctx.Params().Get("content")
-	log.Infof("book comment:%s", content)
-	if this.Member.MemberId == 0 {
+	content := this.Ctx.FormValue("content")
+	bookId, err := this.Ctx.Params().GetInt("id")
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorParameter, "请求参数错误")
+		return
+	}
+
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
 		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
 		return
+	}
+	if member.MemberId == 0 {
+		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
+		return
+	}
+
+	log.Infof("BookController, comment:%s", content)
+
+	if bookId > 0 {
+		if err := models.NewComments().AddComments(member.MemberId, bookId, content); err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "评论失败")
+		}
+		this.JsonResult(common.HttpCodeSuccess, "评论成功")
+	} else {
+		this.JsonResult(common.HttpCodeErrorParameter, "文档图书不存在")
 	}
 }
 
@@ -34,13 +58,25 @@ func (this *BookController) Score() {
 		return
 	}
 
-	score := this.Ctx.URLParam("score")
-	if uid := this.Member.MemberId; uid > 0 {
-		//if err := new(models.Score).AddScore(uid, bookId, score); err != nil {
-		//	c.JsonResult(1, err.Error())
-		//}
-		//c.JsonResult(0, "感谢您给当前文档打分")
+	scoreStr := this.Ctx.URLParam("score")
+	score, _ :=strconv.Atoi(scoreStr)
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
+		return
 	}
-	log.Infof("book id:%d  score:%s", bookId, score)
-	this.JsonResult(common.HttpCodeErrorLoginFirst, "给文档打分失败，请先登录再操作")
+	if member.MemberId == 0 {
+		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
+		return
+	}
+	log.Infof("BookController, book id:%d score:%d", bookId, score)
+
+	if err := models.NewScore().AddScore(member.MemberId, bookId, score); err != nil {
+		log.Infof(err.Error())
+		this.JsonResult(common.HttpCodeErrorDatabase, "您已经为文档评分")
+		return
+	}
+
+	this.JsonResult(common.HttpCodeSuccess, "感谢您为当前文档打分")
 }

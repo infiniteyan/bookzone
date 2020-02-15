@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"bookzone/common"
 	"bookzone/models"
-	"github.com/kataras/iris/mvc"
 	"bookzone/util/log"
+	"github.com/kataras/iris/mvc"
 )
 
-type HomeController struct {}
+type HomeController struct {
+	BaseController
+}
 
 func (this *HomeController) Get() mvc.Result {
 	data := make(map[string]interface{})
@@ -16,6 +19,15 @@ func (this *HomeController) Get() mvc.Result {
 	} else {
 		data["Cates"] = cates
 	}
+
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if ok {
+		data["Member"] = member
+	} else {
+		data["Member"] = models.Member{}
+	}
+
 	return mvc.View{
 		Name: "home/list.html",
 		Data: data,

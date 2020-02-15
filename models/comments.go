@@ -27,10 +27,14 @@ type BookCommentsResult struct {
 	TimeCreate  	time.Time	`json:"time_create"`
 }
 
+func NewComments() *Comments {
+	return &Comments{}
+}
+
 func (this *Comments) AddComments(uid, bookId int, content string) error {
 	var err error
 	second := 10
-	sql := "select id from " + fmt.Sprintf("md_comments_%04d", bookId % 2) + "where uid = ? and time_create > ? order by id desc"
+	sql := "select id from " + fmt.Sprintf("md_comments_%04d", bookId % 2) + " where uid = ? and time_create > ? order by id desc"
 	ret, err := sysinit.DatabaseEngine.QueryString(sql, uid, time.Now().Add(-time.Duration(second) * time.Second))
 	if err != nil {
 		return err
@@ -56,7 +60,7 @@ func (this *Comments) AddComments(uid, bookId int, content string) error {
 func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResult, error) {
 	sql := "select book_id, uid, content, time_create from " + fmt.Sprintf("md_comments_%04d", bookId % 2) + " where book_id = ? limit %v offset %v"
 	sql = fmt.Sprintf(sql, size, (page - 1) * size)
-	retSlice, err := sysinit.DatabaseEngine.QueryString(sql)
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql, bookId)
 
 	if err != nil {
 		return nil, err
@@ -99,7 +103,7 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 
 	sql = "select uid, score from md_score where book_id = ? and uid in(" + uidstr + ")"
 	scores := []*Score{}
-	retSlice, err = sysinit.DatabaseEngine.QueryString(sql)
+	retSlice, err = sysinit.DatabaseEngine.QueryString(sql, bookId)
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +124,15 @@ func (this *Comments) BookComments(page, size, bookId int) ([]*BookCommentsResul
 }
 
 type Score struct {
-	Id 				int
-	BookId 			int
-	Uid 			int
-	Score 			int
-	TimeCreate 		time.Time
+	Id 				int				`xorm:"pk autoincr"`
+	BookId 			int				`json:"book_id"`
+	Uid 			int				`json:"uid"`
+	Score 			int				`json:"score"`
+	TimeCreate 		time.Time		`json:"time_create"`
+}
+
+func NewScore() *Score {
+	return &Score{}
 }
 
 func (this *Score) TableName() string {
@@ -168,8 +176,8 @@ func (this *Score) BookScoreByUid(uid, bookId int) int {
 }
 
 func (this *Score) AddScore(uid, bookId, score int) error {
-	var scoreObj = Score{Uid: uid, BookId: bookId}
-	_, err := sysinit.DatabaseEngine.Get(&score)
+	scoreObj := Score{Uid: uid, BookId: bookId}
+	_, err := sysinit.DatabaseEngine.Get(&scoreObj)
 	if err != nil {
 		return err
 	}

@@ -17,8 +17,25 @@
         </div>
         <nav class="navbar-collapse hidden-xs hidden-sm" style="position: absolute;right: 0px;" role="navigation">
             <ul class="nav navbar-nav navbar-right" style="margin-right: 15px;">
-                <li><a href="/account/regist" title="注册"><i class="fa fa-user-plus"></i> 注册</a></li>
-                <li><a href="/account/login" title="登录"><i class="fa fa-sign-in"></i> 登录</a></li>
+                {{if gt .Member.MemberId 0}}
+                    <li>
+                        <a href="" title="个人主页"><i class="fa fa-home" aria-hidden="true"></i> 个人主页</a>
+                    </li>
+                    <li>
+                        <a href="" title="我的图书"><i class="fa fa-book" aria-hidden="true"></i> 我的图书</a>
+                    </li>
+                    {{if eq .Member.Role 0 }}
+                        <li>
+                            <a href="" title="管理"><i class="fa fa-university" aria-hidden="true"></i> 管理</a>
+                        </li>
+                    {{end}}
+                    <li>
+                        <a href="/account/logout" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
+                    </li>
+                {{else}}
+                    <li><a href="/account/regist" title="注册"><i class="fa fa-user-plus"></i> 注册</a></li>
+                    <li><a href="/account/login" title="登录"><i class="fa fa-sign-in"></i> 登录</a></li>
+                {{end}}
             </ul>
         </nav>
     </div>

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bookzone/common"
 	"bookzone/models"
 	"errors"
 	"github.com/kataras/iris/mvc"
@@ -97,6 +98,14 @@ func (this *DocumentController) Index() mvc.Result {
 	var dataComments []*models.BookCommentsResult
 	dataComments, _ = new(models.Comments).BookComments(1, 30, bookResult.BookId)
 	dataMap["Comments"] = dataComments
+
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if ok {
+		dataMap["Member"] = member
+	} else {
+		dataMap["Member"] = models.Member{}
+	}
 
 	return mvc.View{
 		Name: "document/intro.html",

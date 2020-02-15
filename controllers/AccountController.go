@@ -14,6 +14,11 @@ type AccountController struct {
 	BaseController
 }
 
+func (this *AccountController) BeforeActivation(a mvc.BeforeActivation) {
+	log.Infof("AccountController BeforeActivation")
+	a.Handle("GET", "/logout", "Logout")
+}
+
 func (this *AccountController) GetLogin() mvc.Result {
 	log.Infof("AccountController, get login")
 	return mvc.View{
@@ -22,11 +27,6 @@ func (this *AccountController) GetLogin() mvc.Result {
 			"SITE_NAME":"BOOKZONE",
 		},
 	}
-}
-
-type LoginForm struct {
-	Account 	string 	`json:"account"`
-	Password 	string	`json:"password"`
 }
 
 func (this *AccountController) PostLogin() {
@@ -40,14 +40,16 @@ func (this *AccountController) PostLogin() {
 	log.Infof("%s   %s", account, password)
 	member, err := models.NewMember().Login(account, password)
 	if err != nil {
+		log.Infof(err.Error())
 		this.JsonResult(common.HttpCodeErrorPassword, "密码错误，请重新输入")
 		return
 	}
 	member.LastLoginTime = time.Now()
 	member.Update()
-	//c.SetMember(*member)
-
+	this.SetMemberSession(*member)
 	this.JsonResult(common.HttpCodeSuccess, "ok")
+	log.Infof("AccountController, login success")
+	this.Ctx.Redirect("/")
 }
 
 func (this *AccountController) GetRegist() mvc.Result {
@@ -56,11 +58,10 @@ func (this *AccountController) GetRegist() mvc.Result {
 	}
 }
 
-func (this *AccountController) Logout() mvc.Result {
+func (this *AccountController) Logout() {
 	log.Infof("AccountController, logout")
-	return mvc.Response{
-		Content: []byte("logout"),
-	}
+	this.SetMemberSession(models.Member{MemberId: -1})
+	this.Ctx.Redirect("/")
 }
 
 func (this *AccountController) PostRegist() {
