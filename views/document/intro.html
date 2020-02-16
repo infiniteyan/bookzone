@@ -32,8 +32,12 @@
                         <a href="" target="_blank" title="马上阅读" class="btn btn-success"><i class="fa fa-book"></i> 阅读</a>
                     {{end}}
                     {{end}}
-						<a href="" rel="nofollow" class="btn btn-default ajax-star">
-                            <i class="fa fa-heart-o"></i> <span style="color: #333;">收藏</span>
+                        <a href="/book/collect/{{$.Book.BookId}}" id="collection" rel="nofollow" class="btn btn-default ajax-star">
+                            {{if eq (doesCollection $.Member.MemberId $.Book.BookId) true}}
+                                <i class="fa fa-heart"></i> <span style="color: #333;">已收藏</span>
+                            {{else}}
+                                <i class="fa fa-heart-o"></i> <span style="color: #333;">收藏</span>
+                            {{end}}
                         </a>
                     </div>
                 </li>
@@ -46,8 +50,12 @@
                 <a href="" target="_blank" title="马上阅读" class="btn btn-success"><i class="fa fa-book"></i>阅读</a>
             {{end}}
             {{end}}
-				<a href="" rel="nofollow" class="btn btn-default ajax-star">
-                    <i class="fa fa-heart-o"></i> <span style="color: #333;">收藏</span>
+                <a href="/book/collect/{{$.Book.BookId}}" id="collection" rel="nofollow" class="btn btn-default ajax-star">
+                    {{if eq (doesCollection $.Member.MemberId $.Book.BookId) true}}
+                        <i class="fa fa-heart"></i> <span style="color: #333;">已收藏</span>
+                    {{else}}
+                        <i class="fa fa-heart-o"></i> <span style="color: #333;">收藏</span>
+                    {{end}}
                 </a>
             </div>
         </div>
@@ -67,8 +75,8 @@
     <div class="row">
         <div class="col-xs-12 mbook-menu">
             <ul class="nav nav-tabs">
-                <li {{if eq .Tab "default"}}class="active"{{end}}><a href=""><span class="hidden-xs">文档</span>目录</a></li>
-                <li {{if eq .Tab "comment"}}class="active"{{end}}><a href="?tab=comment"><span class="hidden-xs">文档</span>评论 (<span class="text-muted">{{$.Book.CntComment}}</span>)</a></li>
+                <li {{if eq .Tab "default"}}class="active"{{end}}><a href="/books/{{$.Book.Identify}}"><span class="hidden-xs">文档</span>目录</a></li>
+                <li {{if eq .Tab "comment"}}class="active"{{end}}><a href="/books/{{$.Book.Identify}}?tab=comment"><span class="hidden-xs">文档</span>评论 (<span class="text-muted">{{$.Book.CntComment}}</span>)</a></li>
             </ul>
             <div class="help-block">
                 <ul class="none-listyle">
@@ -76,15 +84,18 @@
                             {{/*评论*/}}
                             <li class="comments-form clearfix">
                                 <div class="score">
-                                    <span title="点击即可给当前文档打分" class="cursor-pointer" data-url="/book/{{$.Book.BookId}}" data-toggle="tooltip">
-                                        <i class="fa fa-star-o" data-score="1" data-tips="很差"></i>
-                                        <i class="fa fa-star-o" data-score="2" data-tips="较差"></i>
-                                        <i class="fa fa-star-o" data-score="3" data-tips="还行"></i>
-                                        <i class="fa fa-star-o" data-score="4" data-tips="推荐"></i>
-                                        <i class="fa fa-star-o" data-score="5" data-tips="力荐"></i>
-                                    </span>
-                                    <span class="text-muted"></span>
-
+                                    {{if gt .MyScore 0}}
+                                        <span class="text-muted">我的评分: <i class="mbook-star star-{{$.MyScore}}"></i></span>
+                                    {{else}}
+                                        <span title="点击即可给当前文档打分" class="cursor-pointer" data-url="/book/{{$.Book.BookId}}" data-toggle="tooltip">
+                                            <i class="fa fa-star-o" data-score="1" data-tips="很差"></i>
+                                            <i class="fa fa-star-o" data-score="2" data-tips="较差"></i>
+                                            <i class="fa fa-star-o" data-score="3" data-tips="还行"></i>
+                                            <i class="fa fa-star-o" data-score="4" data-tips="推荐"></i>
+                                            <i class="fa fa-star-o" data-score="5" data-tips="力荐"></i>
+                                            </span>
+                                        <span class="text-muted"></span>
+                                    {{end}}
                                 </div>
                                 <form action="/book/comment/{{$.Book.BookId}}" method="post" class="ajax-form">
                                     <div class="form-group">

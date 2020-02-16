@@ -27,9 +27,13 @@ type CollectionData struct {
 }
 
 type Collection struct {
-	Id       int 	`json:"id"`
-	MemberId int 	`orm:"index" json:"member_id"`
+	Id       int 	`xorm:"pk autoincr" json:"id"`
+	MemberId int 	`json:"member_id"`
 	BookId   int	`json:"book_id"`
+}
+
+func NewCollection() *Collection {
+	return &Collection{}
 }
 
 func (m *Collection) TableName() string {

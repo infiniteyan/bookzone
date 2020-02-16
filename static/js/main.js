@@ -148,11 +148,10 @@ $(function () {
     });
 
     //收藏获取取消收藏
-    $(".ajax-star").click(function (e) {
+    $("#collection").click(function (e) {
         e.preventDefault()
         var _url=$(this).attr("href"),_this=$(this);
         $.get(_url,function (ret) {
-            alert("=============2")
             ret=parseJson(ret);
             if(ret.errcode==0){//操作成功
                 alertTips("success",ret.message,3000,"");

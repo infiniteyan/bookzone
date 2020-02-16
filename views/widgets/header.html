@@ -19,7 +19,7 @@
             <ul class="nav navbar-nav navbar-right" style="margin-right: 15px;">
                 {{if gt .Member.MemberId 0}}
                     <li>
-                        <a href="" title="个人主页"><i class="fa fa-home" aria-hidden="true"></i> 个人主页</a>
+                        <a href="/user/{{$.Member.Account}}" title="个人主页"><i class="fa fa-home" aria-hidden="true"></i> 个人主页</a>
                     </li>
                     <li>
                         <a href="" title="我的图书"><i class="fa fa-book" aria-hidden="true"></i> 我的图书</a>

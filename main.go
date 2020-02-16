@@ -2,6 +2,7 @@ package main
 
 import (
 	"bookzone/controllers"
+	"bookzone/models"
 	_ "bookzone/models"
 	_ "bookzone/sysinit"
 	"bookzone/util/log"
@@ -21,10 +22,15 @@ func init() {
 
 func newApplication() *iris.Application {
 	application := iris.New()
-	application.RegisterView(iris.HTML("./views", ".html"))
+	template := iris.HTML("./views", ".html")
+	template.AddFunc("doesCollection", models.NewCollection().DoesCollection)
+	application.RegisterView(template)
 	application.StaticWeb("/static", "./static")
+	application.StaticWeb("/uploads", "./uploads")
 	application.Logger().SetLevel("debug")
 
+	mvc.New(application.Party("/user")).Handle(new(controllers.UserController))
+	mvc.New(application.Party("/setting")).Handle(new(controllers.SettingController))
 	mvc.New(application.Party("/explore")).Handle(new(controllers.ExploreController))
 	mvc.New(application.Party("/account")).Handle(new(controllers.AccountController))
 	mvc.New(application.Party("/books")).Handle(new(controllers.DocumentController))

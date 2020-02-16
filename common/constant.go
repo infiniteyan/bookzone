@@ -11,10 +11,12 @@ const (
 	HttpCodeSuccess				HttpCode = iota
 	HttpCodeErrorParameter
 	HttpCodeErrorPassword
+	HttpCodeErrorFile
 	HttpCodeErrorEmail
 	HttpCodeErrorNickname
 	HttpCodeErrorDatabase
 	HttpCodeErrorLoginFirst
 	HttpCodeErrorRegisterFail
 	HttpCodeErrorLoginFail
+	HttpCodeErrorInternal
 )

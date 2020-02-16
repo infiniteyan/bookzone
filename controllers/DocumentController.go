@@ -3,9 +3,9 @@ package controllers
 import (
 	"bookzone/common"
 	"bookzone/models"
+	"bookzone/util/log"
 	"errors"
 	"github.com/kataras/iris/mvc"
-	"bookzone/util/log"
 	"strings"
 )
 
@@ -84,11 +84,24 @@ func (this *DocumentController) Index() mvc.Result {
 	}
 
 	dataMap := make(map[string]interface{})
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if ok {
+		dataMap["Member"] = member
+	} else {
+		dataMap["Member"] = models.Member{}
+	}
 	tab := strings.ToLower(this.Ctx.URLParam("tab"))
+	if tab == "" {
+		tab = "default"
+	}
+	dataMap["SITE_NAME"] = "BOOKZONE"
 	dataMap["Tab"] = tab
 	dataMap["Book"] = bookResult
-	if this.Member.MemberId > 0 {
+	if member.MemberId > 0 {
 		dataMap["MyScore"] = new(models.Score).BookScoreByUid(this.Member.MemberId, bookResult.BookId)
+	} else {
+		dataMap["MyScore"] = 0
 	}
 
 	var dataMenu []*models.Document
@@ -98,14 +111,6 @@ func (this *DocumentController) Index() mvc.Result {
 	var dataComments []*models.BookCommentsResult
 	dataComments, _ = new(models.Comments).BookComments(1, 30, bookResult.BookId)
 	dataMap["Comments"] = dataComments
-
-	session := this.getSession()
-	member, ok := session.Get(common.MemberSessionName).(models.Member)
-	if ok {
-		dataMap["Member"] = member
-	} else {
-		dataMap["Member"] = models.Member{}
-	}
 
 	return mvc.View{
 		Name: "document/intro.html",

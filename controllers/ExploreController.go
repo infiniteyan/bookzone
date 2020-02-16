@@ -22,6 +22,7 @@ func (this *ExploreController) Get() mvc.Result {
 	category, _ := new(models.Category).Find(id)
 	dataMap["Cid"] = id
 	dataMap["Cate"] = category
+	dataMap["SITE_NAME"] = "BOOKZONE"
 	session := this.getSession()
 	member, ok := session.Get(common.MemberSessionName).(models.Member)
 	if ok {

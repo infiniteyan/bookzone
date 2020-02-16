@@ -1,0 +1,18 @@
+<div class="well">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="ucenter-avatar text-center">
+                    <h3>{{.User.Nickname}}</h3>
+                    <div class="help-block"><span class="text-muted">(@{{.User.Account}})</span></div>
+                    {{if .IsSelf}}
+                        <div><a target="_blank" href="/setting" class="btn btn-success btn-sm"><i class="fa fa-cogs"></i> 个人设置</a></div>
+                    {{else}}
+                        <div><a href="" class="btn btn-success btn-sm btn-follow"><i class="fa fa-heart-o"></i> 关注Ta</a></div>
+                    {{end}}
+                    <div class="help-block mgt-15px">{{.User.Description}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

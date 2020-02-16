@@ -181,9 +181,9 @@ func (this *Book) SelectPage(pageIndex, pageSize, memberId int, PrivatelyOwned i
 	}
 
 	for _, data := range retSlice {
-		var book Book
+		var book BookData
 		util.Map2struct(data, &book)
-		books = append(books, book.ToBookData())
+		books = append(books, &book)
 	}
 
 	return books, totalCount, nil

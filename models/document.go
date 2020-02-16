@@ -11,21 +11,21 @@ import (
 )
 
 type Document struct {
-	DocumentId   int           `orm:"pk;auto;column(document_id)" json:"doc_id"`
-	DocumentName string        `orm:"column(document_name);size(500)" json:"doc_name"`
-	Identify     string        `orm:"column(identify);size(100);index;null;default(null)" json:"identify"`
-	BookId       int           `orm:"column(book_id);type(int)" json:"book_id"`
-	ParentId     int           `orm:"column(parent_id);type(int);default(0)" json:"parent_id"`
-	OrderSort    int           `orm:"column(order_sort);default(0);type(int)" json:"order_sort"`
-	Release      string        `orm:"column(release);type(text);null" json:"release"`
-	CreateTime   time.Time     `orm:"column(create_time);type(datetime);auto_now_add" json:"create_time"`
-	MemberId     int           `orm:"column(member_id);type(int)" json:"member_id"`
-	ModifyTime   time.Time     `orm:"column(modify_time);type(datetime);default(null);auto_now" json:"modify_time"`
-	ModifyAt     int           `orm:"column(modify_at);type(int)" json:"-"`
-	Version      int64         `orm:"type(bigint);column(version)" json:"version"`
-	AttachList   []*Attachment `orm:"-" json:"attach"`
-	Vcnt         int           `orm:"column(vcnt);default(0)" json:"vcnt"`
-	Markdown     string        `orm:"-" json:"markdown"`
+	DocumentId   int           `json:"document_id"`
+	DocumentName string        `json:"document_name"`
+	Identify     string        `json:"identify"`
+	BookId       int           `json:"book_id"`
+	ParentId     int           `json:"parent_id"`
+	OrderSort    int           `json:"order_sort"`
+	Release      string        `json:"release"`
+	CreateTime   time.Time     `json:"create_time"`
+	MemberId     int           `json:"member_id"`
+	ModifyTime   time.Time     `json:"modify_time"`
+	ModifyAt     int           `json:"-"`
+	Version      int64         `json:"version"`
+	AttachList   []*Attachment `xorm:"-" json:"attach"`
+	Vcnt         int           `json:"vcnt"`
+	Markdown     string        `xorm:"-" json:"markdown"`
 }
 
 func (this *Document) TableName() string {

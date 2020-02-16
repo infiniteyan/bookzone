@@ -16,6 +16,47 @@ func (this *BookController) BeforeActivation(a mvc.BeforeActivation) {
 	log.Infof("BookController BeforeActivation")
 	a.Handle("POST", "/comment/{id:int}", "Comment")
 	a.Handle("GET", "/{id:int}", "Score")
+	a.Handle("GET", "/collect/{id:int}", "Collection")
+}
+
+func (this *BaseController) Collection() {
+	log.Infof("BookController Collection")
+
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
+		return
+	}
+	if member.MemberId == 0 {
+		this.JsonResult(common.HttpCodeErrorLoginFirst, "评论失败，请先登录再操作")
+		return
+	}
+
+	bookId, err := this.Ctx.Params().GetInt("id")
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorParameter, "参数错误")
+		return
+	}
+
+	if bookId <= 0 {
+		this.JsonResult(common.HttpCodeErrorParameter, "收藏失败，图书不存在")
+		return
+	}
+
+	cancel, err := models.NewCollection().Collection(member.MemberId, bookId)
+	data := map[string]bool{"IsCancel": cancel}
+	if err != nil {
+		log.Infof(err.Error())
+		this.JsonResult(common.HttpCodeErrorDatabase, err.Error())
+		return
+	}
+
+	if cancel {
+		this.JsonResult(common.HttpCodeSuccess, "取消收藏成功", data)
+		return
+	}
+	this.JsonResult(common.HttpCodeSuccess, "添加收藏成功", data)
 }
 
 func (this *BookController) Comment() {
@@ -54,7 +95,7 @@ func (this *BookController) Score() {
 	log.Infof("BookController Score")
 	bookId, err := this.Ctx.Params().GetInt("id")
 	if err != nil {
-		this.JsonResult(common.HttpCodeErrorParameter, "请求参数错误")
+		this.JsonResult(common.HttpCodeErrorParameter, "参数错误")
 		return
 	}
 
