@@ -1,6 +1,8 @@
 package common
 
-import "bookzone/conf"
+import (
+	"bookzone/conf"
+)
 
 const SessionName = "__bookzone_session__"
 

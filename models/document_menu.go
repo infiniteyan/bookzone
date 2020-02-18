@@ -4,6 +4,7 @@ import (
 	"bookzone/sysinit"
 	"bookzone/util"
 	"bytes"
+	"fmt"
 	"html/template"
 	"strconv"
 )
@@ -131,12 +132,10 @@ func (m *Document) treeHTML(array []*DocumentMenu, parentId int, selectedId int,
 			buf.WriteString(selectedLi)
 			buf.WriteString("><a href=\"")
 			if item.Identify != "" {
-				uri := "DocumentController.Read"
-				buf.WriteString(uri)
-			} else {
-				uri := "DocumentController.Read"
+				uri := fmt.Sprintf("/books/%s/%s", item.BookIdentify, item.Identify)
 				buf.WriteString(uri)
 			}
+
 			buf.WriteString("\" title=\"")
 			buf.WriteString(template.HTMLEscapeString(item.DocumentName) + "\"")
 			buf.WriteString(selected + ">")

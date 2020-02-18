@@ -233,7 +233,7 @@ $(function () {
     $(".navg-item[data-mode]").on("click",function () {
         var mode = $(this).data('mode');
         $(this).siblings().removeClass('active').end().addClass('active');
-        $(".m-manual").removeClass("manual-mode-view manual-mode-collect manual-mode-search").addClass("manual-mode-" + mode);
+        $(".m-manual").removeClass("manual-mode-view manual-fa-align-justifymode-collect manual-mode-search").addClass("manual-mode-" + mode);
     });
 
     //显示书签列表
