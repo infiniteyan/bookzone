@@ -54,6 +54,7 @@ func (this *SettingController) Index() mvc.Result {
 	log.Infof("SettingController Index")
 
 	dataMap := make(map[string]interface{})
+	dataMap["SITE_NAME"] = "BOOKZONE"
 	session := this.getSession()
 	member, ok := session.Get(common.MemberSessionName).(models.Member)
 	if ok {
@@ -107,7 +108,7 @@ func (this *SettingController) Upload() {
 	height := int(h1)
 
 	randomName := strconv.FormatInt(time.Now().UnixNano(), 16)
-	filePath := filepath.Join(common.WorkingDirectory, "uploads", time.Now().Format("202011"), randomName + ext)
+	filePath := filepath.Join(common.WorkingDirectory, "uploads", time.Now().Format("200601"), randomName + ext)
 	path := filepath.Dir(filePath)
 	os.MkdirAll(path, os.ModePerm)
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
@@ -131,9 +132,8 @@ func (this *SettingController) Upload() {
 	}
 	os.Remove(filePath)
 
-	filePath = filepath.Join(common.WorkingDirectory, "uploads", time.Now().Format("202011"), randomName + ext)
-	graphics.ImageResizeSaveFile(subImg, 120, 120, filePath)
-	err = graphics.SaveImage(filePath, subImg)
+	filePath = filepath.Join(common.WorkingDirectory, "uploads", time.Now().Format("200601"), randomName + ext)
+	err = graphics.ImageResizeSaveFile(subImg, 120, 120, filePath)
 	if err != nil {
 		this.JsonResult(common.HttpCodeErrorInternal, "保存文件失败")
 		return

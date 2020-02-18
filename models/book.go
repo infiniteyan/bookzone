@@ -12,7 +12,7 @@ import (
 )
 
 type Book struct {
-	BookId 			int					`json:"book_id"`
+	BookId 			int					`xorm:"pk autoincr" json:"book_id"`
 	BookName 		string				`json:"book_name"`
 	Identify       	string    			`json:"identify"`
 	OrderIndex     	int       			`json:"order_index"`

@@ -15,6 +15,10 @@ type BookCategory struct {
 	CategoryId int 		`json:"category_id"`
 }
 
+func NewBookCategory() *BookCategory {
+	return &BookCategory{}
+}
+
 func (m *BookCategory) TableName() string {
 	return "md_book_category"
 }

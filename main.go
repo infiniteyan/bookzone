@@ -5,6 +5,7 @@ import (
 	"bookzone/models"
 	_ "bookzone/models"
 	_ "bookzone/sysinit"
+	"bookzone/util"
 	"bookzone/util/log"
 	"context"
 	"github.com/kataras/iris"
@@ -24,6 +25,7 @@ func newApplication() *iris.Application {
 	application := iris.New()
 	template := iris.HTML("./views", ".html")
 	template.AddFunc("doesCollection", models.NewCollection().DoesCollection)
+	template.AddFunc("inMap", util.InMap)
 	application.RegisterView(template)
 	application.StaticWeb("/static", "./static")
 	application.StaticWeb("/uploads", "./uploads")
