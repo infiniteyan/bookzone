@@ -6,6 +6,8 @@ import (
 	"bookzone/util/log"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"io"
+	"os"
 	"time"
 )
 
@@ -51,6 +53,21 @@ func (this *BaseController) GetSession(key string) interface{} {
 func (this *BaseController) DelSession(key string) {
 	session := this.getSession()
 	session.Delete(key)
+}
+
+func (this *BaseController) SaveToFile(fromfile, tofile string) error {
+	file, _, err := this.Ctx.FormFile(fromfile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	f, err := os.OpenFile(tofile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	io.Copy(f, file)
+	return nil
 }
 
 func (this *BaseController) SetMemberSession(member models.Member) {

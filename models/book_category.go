@@ -32,7 +32,7 @@ func (m *BookCategory) SelectByBookId(book_id int) ([]*Category, int64, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	totalCount = int64(len(ret))
+	totalCount = int64(len(retSlice))
 
 	for _, data := range retSlice {
 		var cat Category

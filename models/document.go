@@ -3,6 +3,7 @@ package models
 import (
 	"bookzone/sysinit"
 	"bookzone/util"
+	"bytes"
 	"errors"
 	"fmt"
 	"bookzone/util/log"
@@ -11,7 +12,7 @@ import (
 )
 
 type Document struct {
-	DocumentId   int           `json:"document_id"`
+	DocumentId   int           `xorm:"pk autoincr" json:"document_id"`
 	DocumentName string        `json:"document_name"`
 	Identify     string        `json:"identify"`
 	BookId       int           `json:"book_id"`
@@ -111,4 +112,45 @@ func (this *Document) GetMenuTop(bookId int) ([]*Document, error) {
 	}
 
 	return docs, nil
+}
+
+func (this *Document) ReleaseContent(bookId int) {
+	util.BooksRelease.Set(bookId)
+	defer util.BooksRelease.Delete(bookId)
+
+	sql := "select document_id from md_documents where book_id = ? limit 5000"
+	retSlice, err := sysinit.DatabaseEngine.QueryString(sql, bookId)
+	if err != nil {
+		log.Infof(err.Error())
+		return
+	}
+
+	documents := []*Document{}
+	for _, data := range retSlice {
+		var doc Document
+		util.Map2struct(data, &doc)
+		documents = append(documents, &doc)
+	}
+
+	documentStore := NewDocumentStore()
+	for _, element := range documents {
+		content := strings.TrimSpace(documentStore.SelectField(element.DocumentId, "content"))
+		element.Release = content
+		attachList, err := NewAttachment().SelectByDocumentId(element.DocumentId)
+
+		if err == nil && len(attachList) > 0 {
+			content := bytes.NewBufferString("<div class=\"attach-list\"><strong>附件</strong><ul>")
+			for _, attach := range attachList {
+				li := fmt.Sprintf("<li><a href=\"%s\" target=\"_blank\" title=\"%s\">%s</a></li>", attach.HttpPath, attach.Name, attach.Name)
+				content.WriteString(li)
+			}
+			content.WriteString("</ul></div>")
+			element.Release += content.String()
+		}
+		_, err = sysinit.DatabaseEngine.Update(element, &Document{DocumentId: element.DocumentId})
+		if err != nil {
+			log.Infof(err.Error())
+			continue
+		}
+	}
 }

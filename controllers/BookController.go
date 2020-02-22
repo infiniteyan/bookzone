@@ -4,19 +4,20 @@ import (
 	"bookzone/common"
 	"bookzone/models"
 	"bookzone/util"
+	"bookzone/util/graphics"
 	"bookzone/util/log"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/kataras/iris/mvc"
 	"html/template"
 	"io"
 	"os"
-	"errors"
 	"path/filepath"
-	"bookzone/util/graphics"
 	"strconv"
 	"strings"
 	"time"
+	"ziyoubiancheng/mbook/utils"
 )
 
 type BookController struct {
@@ -32,6 +33,9 @@ func (this *BookController) BeforeActivation(a mvc.BeforeActivation) {
 	a.Handle("POST", "/comment/{id:int}", "Comment")
 	a.Handle("POST", "/create", "Create")
 	a.Handle("POST", "/uploadcover", "UploadCover")
+	a.Handle("POST", "/createtoken", "CreateToken")
+	a.Handle("POST", "/savebook", "SaveBook")
+	a.Handle("POST", "/release/{key:string}", "Release")
 }
 
 func (this *BookController) Index() mvc.Result {
@@ -151,6 +155,57 @@ func (this *BookController) Create() {
 		log.Errorf(err.Error())
 		this.JsonResult(common.HttpCodeErrorDatabase, "数据库错误")
 		return
+	}
+
+	this.JsonResult(common.HttpCodeSuccess, "ok", bookResult)
+}
+
+func (this *BookController) SaveBook() {
+	log.Infof("BookController.SaveBook")
+
+	bookResult, err := this.hasPermission()
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorPermissionDeny, err.Error())
+		return
+	}
+
+	book, err := models.NewBook().Select("book_id", bookResult.BookId)
+	if err != nil {
+		log.Infof(err.Error())
+		this.JsonResult(common.HttpCodeErrorDatabase, err.Error())
+		return
+	}
+
+	bookName := strings.TrimSpace(this.Ctx.FormValue("book_name"))
+	description := strings.TrimSpace(this.Ctx.FormValue("description"))
+	editor := strings.TrimSpace(this.Ctx.FormValue("editor"))
+
+	if len(description) > 500 {
+		this.JsonResult(common.HttpCodeErrorParameter, "描述需小于500字")
+		return
+	}
+
+	if editor != "markdown" && editor != "html" {
+		editor = "markdown"
+	}
+
+	book.BookName = bookName
+	book.Description = description
+	book.Editor = editor
+	book.Author = this.Ctx.FormValue("author")
+	book.AuthorUrl = this.Ctx.FormValue("author_url")
+
+	if err := book.Update(); err != nil {
+		this.JsonResult(common.HttpCodeErrorDatabase, "保存失败")
+		return
+	}
+	bookResult.BookName = bookName
+	bookResult.Description = description
+
+	cidValues := this.Ctx.FormValues()["cid"]
+
+	if len(cidValues) != 0 {
+		models.NewBookCategory().SetBookCates(book.BookId, cidValues)
 	}
 
 	this.JsonResult(common.HttpCodeSuccess, "ok", bookResult)
@@ -420,4 +475,89 @@ func (this *BookController) UploadCover() {
 	}
 
 	this.JsonResult(common.HttpCodeSuccess, "ok", book.Cover)
+}
+
+func (this *BookController) CreateToken() {
+	log.Infof("BookController.CreateToken")
+	action := this.Ctx.FormValue("action")
+	bookResult, err := this.hasPermission()
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorPermissionDeny, err.Error())
+		return
+	}
+
+	log.Infof("bookid: %d", bookResult.BookId)
+
+	book := &models.Book{}
+	if book, err = models.NewBook().Select("book_id", bookResult.BookId); err != nil {
+		this.JsonResult(common.HttpCodeErrorDatabase, "图书不存在")
+		return
+	}
+
+	if action == "create" {
+		if bookResult.PrivatelyOwned == 0 {
+			this.JsonResult(common.HttpCodeErrorInternal, "公开图书不能创建令牌")
+			return
+		}
+		book.PrivateToken = string(util.Krand(12, util.KC_RAND_KIND_ALL))
+		if err := book.Update(); err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "生成阅读失败")
+			return
+		}
+		this.JsonResult(common.HttpCodeSuccess, "ok", book.PrivateToken)
+		return
+	} else {
+		book.PrivateToken = ""
+		if err := book.ResetPrivateToken(); err != nil {
+			log.Errorf(err.Error())
+			this.JsonResult(common.HttpCodeErrorDatabase, "删除令牌失败")
+			return
+		}
+		this.JsonResult(common.HttpCodeSuccess, "ok", "")
+	}
+}
+
+func (this *BookController) Release() {
+	log.Infof("BookController.Release")
+	identify := this.Ctx.Params().Get("key")
+
+	bookId := 0
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		log.Infof("please login first")
+		this.JsonResult(common.HttpCodeErrorPermissionDeny, "请先登录")
+		return
+	}
+
+	if member.IsAdministrator() {
+		book, err := models.NewBook().Select("identify", identify)
+		if err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "内部错误")
+			return
+		}
+		bookId = book.BookId
+	} else {
+		book, err := models.NewBookData().SelectByIdentify(identify, member.MemberId)
+		if err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "内部错误")
+			return
+		}
+		if book.RoleId != common.BookAdmin && book.RoleId != common.BookFounder && book.RoleId != common.BookEditor {
+			this.JsonResult(common.HttpCodeErrorPermissionDeny, "鉴权失败")
+			return
+		}
+		bookId = book.BookId
+	}
+
+	if exist := utils.BooksRelease.Exist(bookId); exist {
+		this.JsonResult(common.HttpCodeErrorBookRelease, "正在发布中，请稍后操作")
+		return
+	}
+
+	go func() {
+		models.NewDocument().ReleaseContent(bookId)
+	}()
+
+	this.JsonResult(common.HttpCodeSuccess, "已发布")
 }

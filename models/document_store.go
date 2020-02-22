@@ -11,6 +11,10 @@ type DocumentStore struct {
 	Content 		string	`orm:"type(text);"`
 }
 
+func NewDocumentStore() *DocumentStore {
+	return &DocumentStore{}
+}
+
 func (this *DocumentStore) TableName() string {
 	return "md_document_store"
 }

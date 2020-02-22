@@ -49,7 +49,7 @@
                         </label>
                     </div>
                     <div class="form-left">
-                        <form method="post" id="bookEditForm" action="">
+                        <form method="post" id="bookEditForm" action="/book/savebook">
                             <input type="hidden" name="identify" value="{{.Model.Identify}}">
                             <div class="form-group">
                                 <label>标题</label>
@@ -295,7 +295,7 @@
             var btn = $(this).button("loading");
             var action = $(this).attr("data-action");
             $.ajax({
-                url : "",
+                url : "/book/createtoken",
                 type :"post",
                 data : { "identify" : {{.Model.Identify}} , "action" : action },
                 dataType : "json",

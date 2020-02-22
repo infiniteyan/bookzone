@@ -176,7 +176,6 @@ $(function () {
         }
         var _url=$(this).attr("href"),_this=$(this);
         $.get(_url,function (ret) {
-            alert("=============3")
             ret=parseJson(ret);
             if(ret.errcode==0){//操作成功
                 alertTips("success",ret.message,3000,location.href);

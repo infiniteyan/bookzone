@@ -4,6 +4,7 @@ import (
 	"bookzone/sysinit"
 	"fmt"
 	"html/template"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -198,4 +199,11 @@ func Map2struct(m map[string]string, model interface{}) {
 			}
 		}
 	}
+}
+
+func DeleteLocalFiles(object ...string) error {
+	for _, file := range object {
+		os.Remove(strings.TrimLeft(file, "/"))
+	}
+	return nil
 }

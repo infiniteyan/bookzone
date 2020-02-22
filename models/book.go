@@ -101,7 +101,16 @@ func (this *Book) Update(cols ...string) error {
 		return err
 	}
 
-	_, err = sysinit.DatabaseEngine.Cols(cols...).Update(this, bk)
+	if len(cols) > 0 {
+		_, err = sysinit.DatabaseEngine.Cols(cols...).Update(this, bk)
+	} else {
+		_, err = sysinit.DatabaseEngine.Update(this, bk)
+	}
+	return err
+}
+
+func (this *Book) ResetPrivateToken() error {
+	_, err := sysinit.DatabaseEngine.Exec("update md_books set private_token = '' where book_id = ?", this.BookId)
 	return err
 }
 

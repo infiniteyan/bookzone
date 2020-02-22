@@ -10,14 +10,18 @@ import (
 )
 
 type Category struct {
-	Id 		int
-	Pid 	int
-	Title 	string
-	Intro 	string
-	Icon 	string
-	Cnt 	int
-	Sort 	int
-	Status 	bool
+	Id 		int			`json:"id"`
+	Pid 	int			`json:"pid"`
+	Title 	string		`json:"title"`
+	Intro 	string		`json:"intro"`
+	Icon 	string		`json:"icon"`
+	Cnt 	int			`json:"cnt"`
+	Sort 	int			`json:"sort"`
+	Status 	bool		`json:"status"`
+}
+
+func NewCategory() *Category {
+	return &Category{}
 }
 
 func (this *Category) TableName() string {
@@ -97,7 +101,7 @@ func (this *Category) Delete(id int) error {
 }
 
 func (this *Category) UpdateField(id int, field, val string) error {
-	_, err := sysinit.DatabaseEngine.Exec(fmt.Sprintf("update md_category set %v = %v where id = ?", field, val), id)
+	_, err := sysinit.DatabaseEngine.Exec(fmt.Sprintf("update md_category set %v = '%v' where id = ?", field, val), id)
 	return err
 }
 

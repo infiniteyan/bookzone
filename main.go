@@ -36,8 +36,10 @@ func newApplication() *iris.Application {
 	mvc.New(application.Party("/explore")).Handle(new(controllers.ExploreController))
 	mvc.New(application.Party("/account")).Handle(new(controllers.AccountController))
 	mvc.New(application.Party("/books")).Handle(new(controllers.DocumentController))
-	mvc.New(application.Party("/book")).Handle(new(controllers.BookController))
 	mvc.New(application.Party("/read")).Handle(new(controllers.DocumentController))
+	mvc.New(application.Party("/api")).Handle(new(controllers.DocumentController))
+	mvc.New(application.Party("/book")).Handle(new(controllers.BookController))
+	mvc.New(application.Party("/manager")).Handle(new(controllers.ManagerController))
 	mvc.New(application).Handle(new(controllers.HomeController))
 	return application
 }

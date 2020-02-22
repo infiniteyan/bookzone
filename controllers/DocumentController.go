@@ -5,11 +5,14 @@ import (
 	"bookzone/models"
 	"bookzone/util"
 	"bookzone/util/log"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/kataras/iris/mvc"
 	"html/template"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type DocumentController struct {
@@ -19,7 +22,10 @@ type DocumentController struct {
 func (this *DocumentController) BeforeActivation(a mvc.BeforeActivation) {
 	a.Handle("GET", "/{key:string}", "Index")
 	a.Handle("GET", "/{bookidentify:string}/{identify:string}", "Read")
+	a.Handle("GET", "/{key:string}/edit", "Edit")
+	a.Handle("GET", "/content/{key:string}/{id:string}", "Content")
 	a.Handle("POST", "/{key:string}/search", "Search")
+	a.Handle("POST", "/savecontent", "SaveContent")
 }
 
 func (this *DocumentController) getBookData(identify, token string) (*models.BookData, error) {
@@ -59,6 +65,7 @@ func (this *DocumentController) getBookData(identify, token string) (*models.Boo
 }
 
 func (this *DocumentController) Index() mvc.Result {
+	log.Infof("DocumentController.Index")
 	token := this.Ctx.URLParam("token")
 	identify := this.Ctx.Params().Get("key")
 	if len(identify) == 0 {
@@ -130,6 +137,7 @@ func (this *DocumentController) IsFromAjax() bool {
 }
 
 func (this *DocumentController) Read() mvc.Result {
+	log.Infof("DocumentController.Read")
 	bookIdentify := this.Ctx.Params().Get("bookidentify")
 	identify := this.Ctx.Params().Get("identify")
 	token := this.Ctx.URLParam("token")
@@ -265,6 +273,206 @@ func (this *DocumentController) Read() mvc.Result {
 }
 
 func (this *DocumentController) Search() mvc.Result {
+	log.Infof("DocumentController.Search")
 	return mvc.View{
 	}
+}
+
+func (this *DocumentController) Edit() mvc.Result {
+	log.Infof("DocumentController.Edit")
+	docId := 0
+
+	identify := this.Ctx.Params().Get("key")
+	if identify == "" {
+		log.Infof("indentify empty")
+		return mvc.Response{
+			Code: 404,
+		}
+	}
+
+	bookData := models.NewBookData()
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		log.Infof("please login first")
+		return mvc.Response{
+			Code: 404,
+		}
+	}
+	var err error
+	if member.IsAdministrator() {
+		book, err := models.NewBook().Select("identify", identify)
+		if err != nil {
+			log.Infof(err.Error())
+			return mvc.Response{Code: 404}
+		}
+		bookData = book.ToBookData()
+	} else {
+		bookData, err = models.NewBookData().SelectByIdentify(identify, member.MemberId)
+		if err != nil {
+			log.Infof(err.Error())
+			return mvc.Response{Code: 404}
+		}
+
+		if bookData.RoleId == common.BookGeneral {
+			log.Infof(err.Error())
+			return mvc.Response{Code: 404}
+		}
+	}
+
+	dataMap := make(map[string]interface{})
+	dataMap["Model"] = bookData
+	r, _ := json.Marshal(bookData)
+	dataMap["ModelResult"] = template.JS(string(r))
+
+	dataMap["Result"] = template.JS("[]")
+
+	//if id := c.GetString(":id"); id != "" {
+	//	if num, _ := strconv.Atoi(id); num > 0 {
+	//		docId = num
+	//	} else { //字符串
+	//		var doc = models.NewDocument()
+	//		models.GetOrm("w").QueryTable(doc).Filter("identify", id).Filter("book_id", bookData.BookId).One(doc, "document_id")
+	//		docId = doc.DocumentId
+	//	}
+	//}
+
+	trees, err := models.NewDocument().GetMenu(bookData.BookId, docId, true)
+	if err != nil {
+		log.Infof(err.Error())
+		return mvc.Response{Code: 404}
+	} else {
+		if len(trees) > 0 {
+			if jsTree, err := json.Marshal(trees); err == nil {
+				dataMap["Result"] = template.JS(string(jsTree))
+			}
+		} else {
+			dataMap["Result"] = template.JS("[]")
+		}
+	}
+	dataMap["BaiDuMapKey"] = "mapkey"
+
+	return mvc.View{
+		Name: "document/markdown_edit_template.html",
+		Data: dataMap,
+	}
+}
+
+func (this *DocumentController) Content() {
+	log.Infof("DocumentController.Content")
+	identify := this.Ctx.Params().Get("key")
+	docId, _ := strconv.Atoi(this.Ctx.Params().Get("id"))
+
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		log.Infof("please login first")
+		this.JsonResult(common.HttpCodeErrorPermissionDeny, "请先登录")
+		return
+	}
+	if !member.IsAdministrator() {
+		bookData, err := models.NewBookData().SelectByIdentify(identify, member.MemberId)
+		if err != nil || bookData.RoleId == common.BookGeneral {
+			this.JsonResult(common.HttpCodeErrorPermissionDeny, "鉴权失败")
+			return
+		}
+	}
+
+	if docId <= 0 {
+		this.JsonResult(common.HttpCodeErrorParameter, "参数错误")
+		return
+	}
+
+	documentStore := new(models.DocumentStore)
+	doc, err := models.NewDocument().SelectByDocId(docId)
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorDatabase, "文档不存在")
+		return
+	}
+	attach, err := models.NewAttachment().SelectByDocumentId(doc.DocumentId)
+	if err == nil {
+		doc.AttachList = attach
+	}
+
+	doc.Release = ""
+	doc.Markdown = documentStore.SelectField(doc.DocumentId, "markdown")
+	this.JsonResult(common.HttpCodeSuccess, "ok", doc)
+}
+
+func (this *DocumentController) SaveContent() {
+	log.Infof("DocumentController.SaveContent")
+	identify := this.Ctx.FormValue("identify")
+	docId, err := strconv.Atoi(this.Ctx.FormValue("doc_id"))
+
+	bookId := 0
+	session := this.getSession()
+	member, ok := session.Get(common.MemberSessionName).(models.Member)
+	if !ok {
+		log.Infof("please login first")
+		this.JsonResult(common.HttpCodeErrorPermissionDeny, "请先登录")
+		return
+	}
+	if member.IsAdministrator() {
+		book, err := models.NewBook().Select("identify", identify)
+		if err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "获取内容错误")
+			return
+		}
+		bookId = book.BookId
+	} else {
+		bookData, err := models.NewBookData().SelectByIdentify(identify, member.MemberId)
+		if err != nil || bookData.RoleId == common.BookGeneral {
+			this.JsonResult(common.HttpCodeErrorPermissionDeny, "鉴权失败")
+			return
+		}
+		bookId = bookData.BookId
+	}
+
+	if docId <= 0 {
+		this.JsonResult(common.HttpCodeErrorParameter, "参数错误")
+		return
+	}
+
+	documentStore := new(models.DocumentStore)
+
+	markdown := strings.TrimSpace(this.Ctx.FormValue("markdown"))
+	content := this.Ctx.FormValue("html")
+
+	version, _ := strconv.Atoi(this.Ctx.FormValue("version"))
+	isCover := this.Ctx.FormValue("cover")
+
+	doc, err := models.NewDocument().SelectByDocId(docId)
+	if err != nil {
+		this.JsonResult(common.HttpCodeErrorDatabase, "读取文档错误")
+		return
+	}
+	if doc.BookId != bookId {
+		this.JsonResult(common.HttpCodeErrorInternal, "内部错误")
+		return
+	}
+	if int(doc.Version) != version && !strings.EqualFold(isCover, "yes") {
+		this.JsonResult(common.HttpCodeErrorInternal, "文档将被覆盖")
+		return
+	}
+
+	if markdown == "" && content != "" {
+		documentStore.Markdown = content
+	} else {
+		documentStore.Markdown = markdown
+	}
+	documentStore.Content = content
+	doc.Version = time.Now().Unix()
+	if docId, err := doc.InsertOrUpdate(); err != nil {
+		this.JsonResult(common.HttpCodeErrorDatabase, "保存失败")
+		return
+	} else {
+		documentStore.DocumentId = int(docId)
+		if err := documentStore.InsertOrUpdate("markdown", "content"); err != nil {
+			this.JsonResult(common.HttpCodeErrorDatabase, "保存失败")
+			return
+		}
+	}
+
+	doc.Release = ""
+	this.JsonResult(common.HttpCodeSuccess, "ok", doc)
 }

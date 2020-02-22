@@ -42,7 +42,6 @@ $(function () {
 
             var $select_node_id = window.treeCatalog.get_selected();
 
-
             if($select_node_id) {
                 var $select_node = window.treeCatalog.get_node($select_node_id[0])
                 if ($select_node) {
@@ -209,16 +208,15 @@ $(function () {
         var index = layer.load(1, {
             shade: [0.1,'#fff'] //0.1透明度的白色背景
         });
-
-        $.get(window.editURL + $node.node.id ).done(function (res) {
+        $.get(window.contentURL + $node.node.id ).done(function (res) {
             layer.close(index);
             resetEditor();
-            if(res.errcode === 0){
+            if(res.errcode == 0){
                 window.isLoad = true;
                 window.editor.clear();
                 window.editor.insertValue(res.data.markdown);
                 window.editor.setCursor({line:0, ch:0});
-                var node = { "id" : res.data.doc_id,'parent' : res.data.parent_id === 0 ? '#' : res.data.parent_id ,"text" : res.data.doc_name,"identify" : res.data.identify,"version" : res.data.version};
+                var node = { "id" : res.data.document_id,'parent' : res.data.parent_id === 0 ? '#' : res.data.parent_id ,"text" : res.data.doc_name,"identify" : res.data.identify,"version" : res.data.version};
                 pushDocumentCategory(node);
                 window.selectNode = node;
                 pushVueLists(res.data.attach);

@@ -58,7 +58,7 @@ func (m *BookData) SelectByIdentify(identify string, memberId int) (*BookData, e
 
 	relationship := NewRelationship()
 	relationship.BookId = book.BookId
-	relationship.RoleId = 0
+	relationship.RoleId = common.BookFounder
 	_, err = sysinit.DatabaseEngine.Get(relationship)
 	if err != nil {
 		return nil, errors.New("permission denied")

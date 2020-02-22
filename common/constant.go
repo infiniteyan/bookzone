@@ -19,5 +19,6 @@ const (
 	HttpCodeErrorRegisterFail
 	HttpCodeErrorLoginFail
 	HttpCodeErrorInternal
+	HttpCodeErrorBookRelease
 	HttpCodeErrorPermissionDeny
 )
