@@ -8,3 +8,6 @@
 
 #### 图书编辑页面
 ![图书编辑页面](https://github.com/infiniteyan/bookzone/blob/master/images/edit.png)
+
+#### 分类管理页面
+![分类管理页面](https://github.com/infiniteyan/bookzone/blob/master/images/classify.png)
