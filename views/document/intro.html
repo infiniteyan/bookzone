@@ -16,7 +16,7 @@
         </div>
         <div class="col-sm-3 col-xs-6">
             <div class="{{if gt .Book.OrderIndex 0}}recommend-book{{end}}">
-                <img src=""  onerror="this.src='/static/images/book.png'"  class="img-responsive border-cover-img" alt="{{.Book.BookName}}">
+                <img src="{{.Book.Cover}}"  onerror="this.src='/static/images/book.png'"  class="img-responsive border-cover-img" alt="{{.Book.BookName}}">
             </div>
         </div>
         <div class="col-sm-9 col-xs-6">

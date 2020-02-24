@@ -6,6 +6,9 @@
 #### 图书设置页面
 ![图书设置页面](https://github.com/infiniteyan/bookzone/blob/master/images/setting.png)
 
+#### 图书展示页面
+![分类展示页面](https://github.com/infiniteyan/bookzone/blob/master/images/display.png)
+
 #### 图书编辑页面
 ![图书编辑页面](https://github.com/infiniteyan/bookzone/blob/master/images/edit.png)
 
