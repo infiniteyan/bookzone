@@ -4,6 +4,7 @@ import (
 	"bookzone/sysinit"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"os"
 	"reflect"
 	"strconv"
@@ -206,4 +207,11 @@ func DeleteLocalFiles(object ...string) error {
 		os.Remove(strings.TrimLeft(file, "/"))
 	}
 	return nil
+}
+
+func RandomExpire(min int64, max int64) int64 {
+	if min >= max || min == 0 || max == 0 {
+		return max
+	}
+	return rand.Int63n(max - min) + min
 }

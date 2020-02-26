@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bookzone/cache"
 	"bookzone/common"
+	"bookzone/constant"
 	"bookzone/models"
 	"bookzone/util"
 	"bookzone/util/log"
@@ -114,12 +116,24 @@ func (this *DocumentController) Index() mvc.Result {
 		dataMap["MyScore"] = 0
 	}
 
+	bookCacheKey := "dynamiccache_document_" + identify
+	bookMenuCacheKey := bookCacheKey + "menu"
+	bookCommentCacheKey := bookCacheKey + "comments"
+
 	var dataMenu []*models.Document
-	dataMenu, _ = new(models.Document).GetMenuTop(bookResult.BookId)
+	err = cache.ReadStruct(bookMenuCacheKey, &dataMenu)
+	if err != nil {
+		dataMenu, _ = new(models.Document).GetMenuTop(bookResult.BookId)
+		cache.WriteStruct(bookMenuCacheKey, &dataMenu, util.RandomExpire(constant.MIN_REDIS_EXPIRE_SEC, constant.MAX_REDIS_EXPIRE_SEC))
+	}
 	dataMap["Menu"] = dataMenu
 
 	var dataComments []*models.BookCommentsResult
-	dataComments, _ = new(models.Comments).BookComments(1, 30, bookResult.BookId)
+	err = cache.ReadStruct(bookCommentCacheKey, &dataComments)
+	if err != nil {
+		dataComments, _ = new(models.Comments).BookComments(1, 30, bookResult.BookId)
+		cache.WriteStruct(bookCommentCacheKey, &dataComments, util.RandomExpire(constant.MIN_REDIS_EXPIRE_SEC, constant.MAX_REDIS_EXPIRE_SEC))
+	}
 	dataMap["Comments"] = dataComments
 
 	return mvc.View{
