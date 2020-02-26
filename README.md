@@ -1,4 +1,4 @@
-## go web框架iris + xorm + mysql 实现的读书社区 BOOKZONE
+## go web框架iris + xorm + redis + mysql 实现的读书社区 BOOKZONE
 
 #### 首页
 ![首页](https://github.com/infiniteyan/bookzone/blob/master/images/index.png)
