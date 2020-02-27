@@ -3,6 +3,7 @@ package controllers
 import (
 	"bookzone/common"
 	"bookzone/models"
+	"bookzone/mq"
 	"bookzone/util"
 	"bookzone/util/graphics"
 	"bookzone/util/log"
@@ -321,11 +322,19 @@ func (this *BookController) Comment() {
 	}
 
 	log.Infof("BookController, comment:%s", content)
-
 	if bookId > 0 {
-		if err := models.NewComments().AddComments(member.MemberId, bookId, content); err != nil {
-			this.JsonResult(common.HttpCodeErrorDatabase, "评论失败")
+		msgBody := &mq.CommentEntity{
+			BookId: bookId,
+			MemberId: member.MemberId,
+			Content: content,
 		}
+		dataStr, _ := json.Marshal(&msgBody)
+		msgEntity := &mq.MsgEntity{
+			Type: mq.MSG_TYPE_COMMENT,
+			Data: string(dataStr),
+		}
+		ret, _ := json.Marshal(&msgEntity)
+		mq.GlobalSynWorker.Push(string(ret))
 		this.JsonResult(common.HttpCodeSuccess, "评论成功")
 	} else {
 		this.JsonResult(common.HttpCodeErrorParameter, "文档图书不存在")

@@ -63,7 +63,7 @@ func (this *PubSubMessageQueue) Consume(bindingKey string) (<-chan amqp.Delivery
 	var err error
 	err = this.channel.ExchangeDeclare(
 		this.exchange,
-		"faout",
+		"fanout",
 		true,
 		false,
 		false,

@@ -18,7 +18,7 @@ const (
 
 var rabbitMQUrl string
 
-func init()  {
+func init() {
 	urlKey := "url"
 	rabbitMQUrl = conf.GlobalCfg.Section("messagequeue").Key(urlKey).String()
 	if rabbitMQUrl == "" {
@@ -52,4 +52,3 @@ func NewRabbitMQ(t ModelType, queueName string, exchageName string) IMessageQueu
 		return NewSimpleMessageQueue(queueName)
 	}
 }
-

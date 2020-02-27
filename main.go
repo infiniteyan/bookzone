@@ -3,6 +3,7 @@ package main
 import (
 	"bookzone/controllers"
 	"bookzone/models"
+	_ "bookzone/mq"
 	_ "bookzone/models"
 	_ "bookzone/sysinit"
 	"bookzone/util"
